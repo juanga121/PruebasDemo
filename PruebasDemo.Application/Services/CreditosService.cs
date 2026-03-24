@@ -55,5 +55,26 @@ namespace PruebasDemo.Application.Services
             var creditoExistente = await _repository.FindByIdAsync(id) ?? throw new Exception("Crédito no encontrado");
             await _repository.DeleteAsync(creditoExistente.Id);
         }
+
+        public async Task PagarCuota(Guid id, decimal montoPago)
+        {
+            var creditoExistente = await _repository.FindByIdAsync(id) ?? throw new Exception("Crédito no encontrado");
+
+            if (creditoExistente.Estado != 1)
+                throw new Exception("El crédito no está activo");
+
+            if (montoPago <= 0)
+                throw new Exception("El monto de pago debe ser mayor a cero");
+
+            if (montoPago > creditoExistente.Saldo)
+                throw new Exception("El monto de pago excede el saldo del crédito");
+
+            creditoExistente.Saldo -= montoPago;
+
+            if (creditoExistente.Saldo == 0)
+                creditoExistente.Estado = 2;
+
+            await _repository.UpdateAsync(creditoExistente);
+        }
     }
 }
