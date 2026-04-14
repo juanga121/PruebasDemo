@@ -1,47 +1,43 @@
-﻿using PruebasDemo.Application.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using PruebasDemo.Application.Repositories;
+using PruebasDemo.Application.Resources;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PruebasDemo.Domain.Enums;
 
 namespace PruebasDemo.Application.Services
 {
-    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository)
+    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger)
     {
         private readonly IGenericRepository<CreditoEntity, Guid> _repository = repository;
+        private readonly ILogger<CreditosService> _logger = logger;
 
         public async Task CrearCredito(CreditoDTO creditoDTO)
         {
-            CreditoEntity credito = new()
+            var credito = new CreditoEntity
             {
                 Id = Guid.NewGuid(),
                 Monto = creditoDTO.Monto,
                 Saldo = creditoDTO.Monto,
                 TasaInteres = creditoDTO.TasaInteres,
                 Meses = creditoDTO.Meses,
-                Estado = 1,
-                FechaCreacion = DateTime.UtcNow
+                Estado = CreditoEstado.Activo
             };
 
+            _logger.LogInformation(Mensajes.CreditCreateLog, credito.Id);
             await _repository.CreateAsync(credito);
         }
 
         public async Task<List<CreditoEntity>> ObtenerCreditos()
-        {
-            return await _repository.GetAllAsync();
-        }
+            => await _repository.GetAllAsync();
 
         public async Task<CreditoEntity?> ObtenerCreditoPorId(Guid id)
-        {
-            return await _repository.FindByIdAsync(id);
-        }
+            => await _repository.FindByIdAsync(id);
 
         public async Task ActualizarCredito(Guid id, CreditoDTO creditoDTO)
         {
-            var creditoExistente = await _repository.FindByIdAsync(id) ?? throw new Exception("Crédito no encontrado");
+            var creditoExistente = await _repository.FindByIdAsync(id)
+                ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
 
             creditoExistente.Monto = creditoDTO.Monto;
             creditoExistente.TasaInteres = creditoDTO.TasaInteres;
@@ -52,28 +48,32 @@ namespace PruebasDemo.Application.Services
 
         public async Task EliminarCredito(Guid id)
         {
-            var creditoExistente = await _repository.FindByIdAsync(id) ?? throw new Exception("Crédito no encontrado");
+            var creditoExistente = await _repository.FindByIdAsync(id)
+                ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
+
             await _repository.DeleteAsync(creditoExistente.Id);
         }
 
         public async Task PagarCuota(Guid id, decimal montoPago)
         {
-            var creditoExistente = await _repository.FindByIdAsync(id) ?? throw new Exception("Crédito no encontrado");
+            var creditoExistente = await _repository.FindByIdAsync(id)
+                ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
 
-            if (creditoExistente.Estado != 1)
-                throw new Exception("El crédito no está activo");
+            if (creditoExistente.Estado != CreditoEstado.Activo)
+                throw new InvalidOperationException(Mensajes.CreditoNotActive);
 
             if (montoPago <= 0)
-                throw new Exception("El monto de pago debe ser mayor a cero");
+                throw new InvalidOperationException(Mensajes.PaymentMustBePositive);
 
             if (montoPago > creditoExistente.Saldo)
-                throw new Exception("El monto de pago excede el saldo del crédito");
+                throw new InvalidOperationException(Mensajes.PaymentExceedsBalance);
 
             creditoExistente.Saldo -= montoPago;
 
             if (creditoExistente.Saldo == 0)
-                creditoExistente.Estado = 2;
+                creditoExistente.Estado = CreditoEstado.Pagado;
 
+            _logger.LogInformation(Mensajes.PaymentMade, creditoExistente.Id, montoPago);
             await _repository.UpdateAsync(creditoExistente);
         }
     }

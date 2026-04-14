@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PruebasDemo.Application.Services;
 using PruebasDemo.Domain.DTO;
+using PruebasDemo.Resources;
 
 namespace PruebasDemo.Controllers
 {
@@ -18,7 +19,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = "Crédito creado exitosamente"
+                mensaje = CreditoMensajes.SuccessCreated
             });
         }
 
@@ -30,7 +31,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = "Créditos obtenidos correctamente",
+                mensaje = CreditoMensajes.SuccessGet,
                 data = creditos
             });
         }
@@ -40,19 +41,10 @@ namespace PruebasDemo.Controllers
         {
             var credito = await _creditosService.ObtenerCreditoPorId(id);
 
-            if (credito == null)
-            {
-                return NotFound(new
-                {
-                    exito = false,
-                    mensaje = "Crédito no encontrado"
-                });
-            }
-
             return Ok(new
             {
                 exito = true,
-                mensaje = "Crédito encontrado",
+                mensaje = CreditoMensajes.SuccessFound,
                 data = credito
             });
         }
@@ -60,70 +52,37 @@ namespace PruebasDemo.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> ActualizarCredito(Guid id, [FromBody] CreditoDTO creditoDTO)
         {
-            try
-            {
-                await _creditosService.ActualizarCredito(id, creditoDTO);
+            await _creditosService.ActualizarCredito(id, creditoDTO);
 
-                return Ok(new
-                {
-                    exito = true,
-                    mensaje = "Crédito actualizado exitosamente"
-                });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return BadRequest(new
-                {
-                    exito = false,
-                    mensaje = ex.Message
-                });
-            }
+                exito = true,
+                mensaje = CreditoMensajes.SuccessUpdated
+            });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarCredito(Guid id)
         {
-            try
-            {
-                await _creditosService.EliminarCredito(id);
+            await _creditosService.EliminarCredito(id);
 
-                return Ok(new
-                {
-                    exito = true,
-                    mensaje = "Crédito eliminado exitosamente"
-                });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return BadRequest(new
-                {
-                    exito = false,
-                    mensaje = ex.Message
-                });
-            }
+                exito = true,
+                mensaje = CreditoMensajes.SuccessDeleted
+            });
         }
 
         [HttpPut("pagar/{id}")]
         public async Task<IActionResult> PagarCuota(Guid id, [FromBody] decimal montoPago)
         {
-            try
-            {
-                await _creditosService.PagarCuota(id, montoPago);
+            await _creditosService.PagarCuota(id, montoPago);
 
-                return Ok(new
-                {
-                    exito = true,
-                    mensaje = "Pago realizado correctamente"
-                });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                return BadRequest(new
-                {
-                    exito = false,
-                    mensaje = ex.Message
-                });
-            }
+                exito = true,
+                mensaje = CreditoMensajes.SuccessPayment
+            });
         }
     }
 }
