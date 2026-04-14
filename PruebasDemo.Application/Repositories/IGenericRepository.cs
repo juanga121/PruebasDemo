@@ -10,7 +10,7 @@ namespace PruebasDemo.Application.Repositories
     public interface IGenericRepository<T, TKey> where TKey : notnull
     {
         Task CreateAsync(T entity);
-        Task DeleteAsync(TKey entity);
+        Task DeleteAsync(TKey id);
         Task<T?> FindByIdAsync(TKey id);
         Task<List<T>> GetAllAsync();
         List<T> GetByFilter(Expression<Func<T, bool>> filter);
