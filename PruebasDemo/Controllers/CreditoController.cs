@@ -7,7 +7,7 @@ namespace PruebasDemo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CreditoController(CreditosService creditosService) : Controller
+    public class CreditoController(CreditosService creditosService) : ControllerBase
     {
         private readonly CreditosService _creditosService = creditosService;
 
