@@ -12,7 +12,7 @@ namespace PruebasDemo.Controllers
         private readonly CreditosService _creditosService = creditosService;
 
         [HttpPost]
-        public async Task<IActionResult> CrearCredito([FromBody] CreditoDTO creditoDTO)
+        public async Task<IActionResult> CrearCredito([FromBody] CreditoDto creditoDTO)
         {
             await _creditosService.CrearCredito(creditoDTO);
 
@@ -50,7 +50,7 @@ namespace PruebasDemo.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> ActualizarCredito(Guid id, [FromBody] CreditoDTO creditoDTO)
+        public async Task<IActionResult> ActualizarCredito(Guid id, [FromBody] CreditoDto creditoDTO)
         {
             await _creditosService.ActualizarCredito(id, creditoDTO);
 

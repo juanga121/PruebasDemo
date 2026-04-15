@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PruebasDemo.Domain.DTO
 {
-    public class CreditoDTO
+    public class CreditoDto
     {
         public decimal Monto { get;set; }
         public decimal TasaInteres { get; set; }

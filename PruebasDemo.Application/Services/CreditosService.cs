@@ -12,7 +12,7 @@ namespace PruebasDemo.Application.Services
         private readonly IGenericRepository<CreditoEntity, Guid> _repository = repository;
         private readonly ILogger<CreditosService> _logger = logger;
 
-        public async Task CrearCredito(CreditoDTO creditoDTO)
+        public async Task CrearCredito(CreditoDto creditoDTO)
         {
             var credito = new CreditoEntity
             {
@@ -34,7 +34,7 @@ namespace PruebasDemo.Application.Services
         public async Task<CreditoEntity?> ObtenerCreditoPorId(Guid id)
             => await _repository.FindByIdAsync(id);
 
-        public async Task ActualizarCredito(Guid id, CreditoDTO creditoDTO)
+        public async Task ActualizarCredito(Guid id, CreditoDto creditoDTO)
         {
             var creditoExistente = await _repository.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);

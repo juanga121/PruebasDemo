@@ -69,7 +69,7 @@ namespace PruebasDemo.Infrastructure.Repositories
             await _efContext.SaveChangesAsync();
         }
 
-        private void SetCreationDate(T entity)
+        private static void SetCreationDate(T entity)
         {
             var prop = typeof(T).GetProperty("FechaCreacion");
 

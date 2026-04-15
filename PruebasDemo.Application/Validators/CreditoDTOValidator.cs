@@ -4,9 +4,9 @@ using PruebasDemo.Domain.DTO;
 
 namespace PruebasDemo.Application.Validators
 {
-    public class CreditoDTOValidator : AbstractValidator<CreditoDTO>
+    public class CreditoDtoValidator : AbstractValidator<CreditoDto>
     {
-        public CreditoDTOValidator()
+        public CreditoDtoValidator()
         {
             RuleFor(x => x.Monto)
                 .GreaterThan(0)
