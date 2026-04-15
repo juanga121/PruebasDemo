@@ -1,0 +1,42 @@
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Sonar Begin
+        run: |
+          dotnet sonarscanner begin \
+          /k:"juanga121_PruebasDemo" \
+          /o:"juanga121" \
+          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.cs.cobertura.reportsPaths="**/coverage.cobertura.xml"
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test + Coverage
+        run: dotnet test --no-build --collect:"XPlat Code Coverage"
+
+      - name: Sonar End
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

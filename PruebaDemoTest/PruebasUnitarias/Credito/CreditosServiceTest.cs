@@ -88,7 +88,7 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<Exception>(() => service.PagarCuota(id, 10));
+            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.PagarCuota(id, 10));
             Assert.Equal("Crédito no encontrado", ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
@@ -113,7 +113,7 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<Exception>(() => service.PagarCuota(id, 10));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 10));
             Assert.Equal("El crédito no está activo", ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
@@ -138,11 +138,11 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
 
             // Act & Assert
-            var exZero = await Assert.ThrowsAsync<Exception>(() => service.PagarCuota(id, 0));
+            var exZero = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 0));
             Assert.Equal("El monto de pago debe ser mayor a cero", exZero.Message);
 
             // Act & Assert
-            var exNeg = await Assert.ThrowsAsync<Exception>(() => service.PagarCuota(id, -5));
+            var exNeg = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, -5));
             Assert.Equal("El monto de pago debe ser mayor a cero", exNeg.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
@@ -167,7 +167,7 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<Exception>(() => service.PagarCuota(id, 50));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 50));
             Assert.Equal("El monto de pago excede el saldo del crédito", ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
