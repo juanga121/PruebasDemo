@@ -14,11 +14,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Install SonarScanner
         run: dotnet tool install --global dotnet-sonarscanner
@@ -33,17 +43,22 @@ jobs:
           /o:"juanga121" \
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml" \
+          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
           /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**"
 
       - name: Build
         run: dotnet build --no-restore
 
       - name: Test + Coverage
-        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/
+        run: |
+          dotnet test \
+          --no-build \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=opencover \
+          /p:CoverletOutput=./coverage/coverage.opencover.xml
 
       - name: Ver coverage generado
-        run: ls -R PruebaDemoTest/coverage
+        run: ls -R
 
       - name: Sonar End
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
