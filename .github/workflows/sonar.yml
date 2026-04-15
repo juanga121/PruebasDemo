@@ -32,7 +32,7 @@ jobs:
           /k:"juanga121_PruebasDemo" \
           /o:"juanga121" \
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-          /d:sonar.cs.cobertura.reportsPaths="coverage/coverage.cobertura.xml" \
+          /d:sonar.cs.cobertura.reportsPaths="PruebaDemoTest/coverage/coverage.cobertura.xml" \
           /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**"
 
       - name: Build
@@ -42,7 +42,7 @@ jobs:
         run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./coverage/
 
       - name: Ver coverage generado
-        run: ls -R coverage
+        run: ls -R PruebaDemoTest/coverage
 
       - name: Sonar End
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
