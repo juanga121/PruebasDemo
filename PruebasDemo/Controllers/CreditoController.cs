@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PruebasDemo.Application.Services;
+using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Resources;
 
@@ -7,9 +7,9 @@ namespace PruebasDemo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CreditoController(CreditosService creditosService) : ControllerBase
+    public class CreditoController(ICreditoService creditosService) : ControllerBase
     {
-        private readonly CreditosService _creditosService = creditosService;
+        private readonly ICreditoService _creditosService = creditosService;
 
         [HttpPost]
         public async Task<IActionResult> CrearCredito([FromBody] CreditoDto creditoDTO)

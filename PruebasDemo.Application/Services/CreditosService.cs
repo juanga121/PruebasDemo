@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using PruebasDemo.Application.Repositories;
+using PruebasDemo.Application.Interfaces.Repositories;
+using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Application.Resources;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
@@ -7,7 +8,7 @@ using PruebasDemo.Domain.Enums;
 
 namespace PruebasDemo.Application.Services
 {
-    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger)
+    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger) : ICreditoService
     {
         private readonly IGenericRepository<CreditoEntity, Guid> _repository = repository;
         private readonly ILogger<CreditosService> _logger = logger;

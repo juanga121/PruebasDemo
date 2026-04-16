@@ -1,4 +1,5 @@
-﻿using PruebasDemo.Application.Repositories;
+﻿using PruebasDemo.Application.Interfaces.Repositories;
+using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Application.Services;
 using PruebasDemo.Infrastructure.Repositories;
 
@@ -10,6 +11,7 @@ namespace PruebasDemo.Configuration
         {
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             services.AddScoped<CreditosService>();
+            services.AddScoped<ICreditoService, CreditosService>();
             return services;
         }
     }

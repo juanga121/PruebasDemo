@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using PruebasDemo.Application.Repositories;
+using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Services;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;

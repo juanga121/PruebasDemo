@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PruebasDemo.Application.Repositories
+namespace PruebasDemo.Application.Interfaces.Repositories
 {
     public interface IGenericRepository<T, TKey> where TKey : notnull
     {

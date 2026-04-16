@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PruebasDemo.Application.Repositories;
+using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Infrastructure.Data;
 using System.Linq.Expressions;
 

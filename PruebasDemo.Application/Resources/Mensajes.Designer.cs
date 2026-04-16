@@ -22,7 +22,7 @@ namespace PruebasDemo.Application.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Mensajes {
+    public class Mensajes {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -51,7 +51,7 @@ namespace PruebasDemo.Application.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Creando nuevo crédito con ID: {CreditoId}.
         /// </summary>
-        internal static string CreditCreateLog {
+        public static string CreditCreateLog {
             get {
                 return ResourceManager.GetString("CreditCreateLog", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to El crédito no está activo.
         /// </summary>
-        internal static string CreditoNotActive {
+        public static string CreditoNotActive {
             get {
                 return ResourceManager.GetString("CreditoNotActive", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Crédito no encontrado.
         /// </summary>
-        internal static string CreditoNotFound {
+        public static string CreditoNotFound {
             get {
                 return ResourceManager.GetString("CreditoNotFound", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Los meses deben ser mayor a cero..
         /// </summary>
-        internal static string MonthMustBePositive {
+        public static string MonthMustBePositive {
             get {
                 return ResourceManager.GetString("MonthMustBePositive", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to El monto debe ser mayor a cero..
         /// </summary>
-        internal static string MontoMustBePositive {
+        public static string MontoMustBePositive {
             get {
                 return ResourceManager.GetString("MontoMustBePositive", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to El monto de pago excede el saldo del crédito.
         /// </summary>
-        internal static string PaymentExceedsBalance {
+        public static string PaymentExceedsBalance {
             get {
                 return ResourceManager.GetString("PaymentExceedsBalance", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Pago realizado para el crédito con ID: {CreditoId}, Monto: {MontoPago}.
         /// </summary>
-        internal static string PaymentMade {
+        public static string PaymentMade {
             get {
                 return ResourceManager.GetString("PaymentMade", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to El monto de pago debe ser mayor a cero.
         /// </summary>
-        internal static string PaymentMustBePositive {
+        public static string PaymentMustBePositive {
             get {
                 return ResourceManager.GetString("PaymentMustBePositive", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Crédito creado exitosamente.
         /// </summary>
-        internal static string SuccessCreated {
+        public static string SuccessCreated {
             get {
                 return ResourceManager.GetString("SuccessCreated", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Crédito eliminado exitosamente.
         /// </summary>
-        internal static string SuccessDeleted {
+        public static string SuccessDeleted {
             get {
                 return ResourceManager.GetString("SuccessDeleted", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Crédito encontrado.
         /// </summary>
-        internal static string SuccessFound {
+        public static string SuccessFound {
             get {
                 return ResourceManager.GetString("SuccessFound", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Créditos obtenidos correctamente.
         /// </summary>
-        internal static string SuccessGet {
+        public static string SuccessGet {
             get {
                 return ResourceManager.GetString("SuccessGet", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Pago realizado correctamente.
         /// </summary>
-        internal static string SuccessPayment {
+        public static string SuccessPayment {
             get {
                 return ResourceManager.GetString("SuccessPayment", resourceCulture);
             }
@@ -180,7 +180,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Crédito actualizado exitosamente.
         /// </summary>
-        internal static string SuccessUpdated {
+        public static string SuccessUpdated {
             get {
                 return ResourceManager.GetString("SuccessUpdated", resourceCulture);
             }
@@ -189,7 +189,7 @@ namespace PruebasDemo.Application.Resources {
         /// <summary>
         ///   Looks up a localized string similar to La tasa de interés no puede ser negativa..
         /// </summary>
-        internal static string TasaMustBePositive {
+        public static string TasaMustBePositive {
             get {
                 return ResourceManager.GetString("TasaMustBePositive", resourceCulture);
             }
