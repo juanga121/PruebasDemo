@@ -8,11 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.26" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PruebasDemo.Application\PruebasDemo.Application.csproj" />
+    <ProjectReference Include="..\PruebasDemo.Domain\PruebasDemo.Domain.csproj" />
     <ProjectReference Include="..\PruebasDemo.Infrastructure\PruebasDemo.Infrastructure.csproj" />
   </ItemGroup>
 

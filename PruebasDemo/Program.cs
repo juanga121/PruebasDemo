@@ -28,8 +28,7 @@ Log.Logger = new LoggerConfiguration()
 
 // Add services to the container.
 
-var connectionString = builder.Configuration.GetConnectionString("ConexionDB");
-builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDatabase(builder.Configuration, builder.Environment);
 
 builder.Services.AddCors(options =>
 {
@@ -75,3 +74,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 await app.RunAsync();
+
+public partial class Program { }
