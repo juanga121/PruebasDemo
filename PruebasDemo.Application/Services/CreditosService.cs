@@ -2,6 +2,7 @@
 using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Application.Resources;
+using PruebasDemo.Application.Resources.Constants;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
@@ -25,7 +26,7 @@ namespace PruebasDemo.Application.Services
                 Estado = CreditoEstado.Activo
             };
 
-            _logger.LogInformation(Mensajes.CreditCreateLog, credito.Id);
+            _logger.LogInformation(LogTemplates.CreditCreate, credito.Id);
             await _repository.CreateAsync(credito);
         }
 
@@ -74,7 +75,7 @@ namespace PruebasDemo.Application.Services
             if (creditoExistente.Saldo == 0)
                 creditoExistente.Estado = CreditoEstado.Pagado;
 
-            _logger.LogInformation(Mensajes.PaymentMade, creditoExistente.Id, montoPago);
+            _logger.LogInformation(LogTemplates.PaymentMade, creditoExistente.Id, montoPago);
             await _repository.UpdateAsync(creditoExistente);
         }
     }
