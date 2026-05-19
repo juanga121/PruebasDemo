@@ -73,10 +73,10 @@ namespace PruebasDemo.Controllers
             });
         }
 
-        [HttpPut("pagar/{id}")]
-        public async Task<IActionResult> PagarCuota(Guid id, [FromBody] decimal montoPago)
+        [HttpPut("pagar")]
+        public async Task<IActionResult> PagarCuota([FromBody] PagoCreditoDto pagoCreditoDto)
         {
-            await _creditosService.PagarCuota(id, montoPago);
+            await _creditosService.PagarCuota(pagoCreditoDto);
 
             return Ok(new
             {

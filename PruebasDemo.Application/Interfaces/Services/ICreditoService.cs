@@ -15,6 +15,6 @@ namespace PruebasDemo.Application.Interfaces.Services
         Task<CreditoEntity?> ObtenerCreditoPorId(Guid id);
         Task ActualizarCredito(Guid id, CreditoDto creditoDTO);
         Task EliminarCredito(Guid id);
-        Task PagarCuota(Guid id, decimal montoPago);
+        Task PagarCuota(PagoCreditoDto pagoCreditoDto);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentValidation;
+using Microsoft.Extensions.Logging;
 using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Application.Resources;
@@ -9,13 +10,33 @@ using PruebasDemo.Domain.Enums;
 
 namespace PruebasDemo.Application.Services
 {
-    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger) : ICreditoService
+    public class CreditosService : ICreditoService
     {
-        private readonly IGenericRepository<CreditoEntity, Guid> _repository = repository;
-        private readonly ILogger<CreditosService> _logger = logger;
+        private readonly IGenericRepository<CreditoEntity, Guid> _repository;
+        private readonly ILogger<CreditosService> _logger;
+        private readonly IValidator<CreditoDto> _creditoDtoValidator;
+        private readonly IValidator<PagoCreditoDto> _pagoCreditoValidator;
+
+        public CreditosService(
+            IGenericRepository<CreditoEntity, Guid> repository, 
+            ILogger<CreditosService> logger,
+            IValidator<CreditoDto> creditoDtoValidator,
+            IValidator<PagoCreditoDto> pagoCreditoValidator)
+        {
+            _repository = repository;
+            _logger = logger;
+            _creditoDtoValidator = creditoDtoValidator;
+            _pagoCreditoValidator = pagoCreditoValidator;
+        }
 
         public async Task CrearCredito(CreditoDto creditoDTO)
         {
+            var validationResult = await _creditoDtoValidator.ValidateAsync(creditoDTO);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var credito = new CreditoEntity
             {
                 Id = Guid.NewGuid(),
@@ -38,6 +59,12 @@ namespace PruebasDemo.Application.Services
 
         public async Task ActualizarCredito(Guid id, CreditoDto creditoDTO)
         {
+            var validationResult = await _creditoDtoValidator.ValidateAsync(creditoDTO);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var creditoExistente = await _repository.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
 
@@ -56,27 +83,24 @@ namespace PruebasDemo.Application.Services
             await _repository.DeleteAsync(creditoExistente.Id);
         }
 
-        public async Task PagarCuota(Guid id, decimal montoPago)
+        public async Task PagarCuota(PagoCreditoDto pagoCreditoDto)
         {
-            var creditoExistente = await _repository.FindByIdAsync(id)
-                ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
+            var validationResult = await _pagoCreditoValidator.ValidateAsync(pagoCreditoDto);
+            
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
 
-            if (creditoExistente.Estado != CreditoEstado.Activo)
-                throw new InvalidOperationException(Mensajes.CreditoNotActive);
+            var credito = (await _repository.FindByIdAsync(pagoCreditoDto.CreditoId))!;
+            
+            credito.Saldo -= pagoCreditoDto.MontoPago;
 
-            if (montoPago <= 0)
-                throw new InvalidOperationException(Mensajes.PaymentMustBePositive);
+            if (credito.Saldo == 0)
+                credito.Estado = CreditoEstado.Pagado;
 
-            if (montoPago > creditoExistente.Saldo)
-                throw new InvalidOperationException(Mensajes.PaymentExceedsBalance);
-
-            creditoExistente.Saldo -= montoPago;
-
-            if (creditoExistente.Saldo == 0)
-                creditoExistente.Estado = CreditoEstado.Pagado;
-
-            _logger.LogInformation(LogTemplates.PaymentMade, creditoExistente.Id, montoPago);
-            await _repository.UpdateAsync(creditoExistente);
+            _logger.LogInformation(LogTemplates.PaymentMade, credito.Id, pagoCreditoDto.MontoPago);
+            await _repository.UpdateAsync(credito);
         }
     }
 }
