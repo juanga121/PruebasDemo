@@ -16,8 +16,26 @@ namespace PruebasDemo.Application.Services
         private readonly ILogger<CreditosService> _logger = logger;
         private readonly IValidator<PagarCuotaDto> _pagarCuotaValidator = pagarCuotaValidator;
 
+        public CreditosService(
+            IGenericRepository<CreditoEntity, Guid> repository, 
+            ILogger<CreditosService> logger,
+            IValidator<CreditoDto> creditoDtoValidator,
+            IValidator<PagoCreditoDto> pagoCreditoValidator)
+        {
+            _repository = repository;
+            _logger = logger;
+            _creditoDtoValidator = creditoDtoValidator;
+            _pagoCreditoValidator = pagoCreditoValidator;
+        }
+
         public async Task CrearCredito(CreditoDto creditoDTO)
         {
+            var validationResult = await _creditoDtoValidator.ValidateAsync(creditoDTO);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var credito = new CreditoEntity
             {
                 Id = Guid.NewGuid(),
@@ -40,6 +58,12 @@ namespace PruebasDemo.Application.Services
 
         public async Task ActualizarCredito(Guid id, CreditoDto creditoDTO)
         {
+            var validationResult = await _creditoDtoValidator.ValidateAsync(creditoDTO);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+
             var creditoExistente = await _repository.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
 

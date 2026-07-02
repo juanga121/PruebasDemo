@@ -3,9 +3,8 @@ using PruebasDemo.Constants;
 using PruebasDemo.Middlewares;
 using Serilog;
 using Serilog.Events;
-using FluentValidation.AspNetCore;
-using PruebasDemo.Application.Validators;
 using FluentValidation;
+using PruebasDemo.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +23,7 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
-// Add services to the container.
-
+// Add services to the container
 builder.Services.AddDatabase(builder.Configuration, builder.Environment);
 
 builder.Services.AddCors(options =>
@@ -42,18 +40,15 @@ builder.Services.AddFluentValidationClientsideAdapters();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreditoDtoValidator>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddRepositoryDependency();
-builder.Services.AddScoped<PruebasDemo.Application.Services.CreditosService>();
 
 builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
