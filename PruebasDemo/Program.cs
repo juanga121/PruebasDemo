@@ -4,7 +4,7 @@ using PruebasDemo.Middlewares;
 using Serilog;
 using Serilog.Events;
 using FluentValidation;
-using PruebasDemo.Application.Validators;
+using PruebasDemo.Application.Creditos.Commands.CrearCredito;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,9 +36,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddFluentValidationClientsideAdapters();
-
-builder.Services.AddValidatorsFromAssemblyContaining<CreditoDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CrearCreditoCommandValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -53,6 +51,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PruebasDemo.Infrastructure.Data.DataContext>();
+    db.Database.EnsureCreated();
 }
 
 app.UseMiddleware<ExceptionMiddleware>();

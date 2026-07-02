@@ -1,20 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PruebasDemo.Application.Interfaces.Services;
-using PruebasDemo.Domain.DTO;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using PruebasDemo.Application.Creditos.Commands.ActualizarCredito;
+using PruebasDemo.Application.Creditos.Commands.CrearCredito;
+using PruebasDemo.Application.Creditos.Commands.EliminarCredito;
+using PruebasDemo.Application.Creditos.Commands.PagarCuota;
+using PruebasDemo.Application.Creditos.Queries.ObtenerCreditoPorId;
+using PruebasDemo.Application.Creditos.Queries.ObtenerCreditos;
 using PruebasDemo.Application.Resources;
+using PruebasDemo.Domain.DTO;
 
 namespace PruebasDemo.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CreditoController(ICreditoService creditosService) : ControllerBase
+    public class CreditoController(ISender sender) : ControllerBase
     {
-        private readonly ICreditoService _creditosService = creditosService;
-
         [HttpPost]
         public async Task<IActionResult> CrearCredito([FromBody] CreditoDto creditoDTO)
         {
-            await _creditosService.CrearCredito(creditoDTO);
+            await sender.Send(new CrearCreditoCommand(creditoDTO));
 
             return Ok(new
             {
@@ -26,7 +30,7 @@ namespace PruebasDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> ObtenerCreditos()
         {
-            var creditos = await _creditosService.ObtenerCreditos();
+            var creditos = await sender.Send(new ObtenerCreditosQuery());
 
             return Ok(new
             {
@@ -39,7 +43,7 @@ namespace PruebasDemo.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> ObtenerCreditoPorId(Guid id)
         {
-            var credito = await _creditosService.ObtenerCreditoPorId(id);
+            var credito = await sender.Send(new ObtenerCreditoPorIdQuery(id));
 
             return Ok(new
             {
@@ -52,7 +56,7 @@ namespace PruebasDemo.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> ActualizarCredito(Guid id, [FromBody] CreditoDto creditoDTO)
         {
-            await _creditosService.ActualizarCredito(id, creditoDTO);
+            await sender.Send(new ActualizarCreditoCommand(id, creditoDTO));
 
             return Ok(new
             {
@@ -64,7 +68,7 @@ namespace PruebasDemo.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarCredito(Guid id)
         {
-            await _creditosService.EliminarCredito(id);
+            await sender.Send(new EliminarCreditoCommand(id));
 
             return Ok(new
             {
@@ -76,7 +80,7 @@ namespace PruebasDemo.Controllers
         [HttpPut("pagar")]
         public async Task<IActionResult> PagarCuota(PagarCuotaDto pagarCuotaDto)
         {
-            await _creditosService.PagarCuota(pagarCuotaDto);
+            await sender.Send(new PagarCuotaCommand(pagarCuotaDto));
 
             return Ok(new
             {

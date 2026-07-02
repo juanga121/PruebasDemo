@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+ using FluentValidation;
 using PruebasDemo.Application.Resources.Constants;
 
 namespace PruebasDemo.Middlewares
@@ -15,79 +16,61 @@ namespace PruebasDemo.Middlewares
             {
                 await _next(httpContext);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!IsCatastrophic(ex))
             {
-                _logger.LogError(ex, LogTemplates.ErrorNoControlado);
-                await HandleExceptionAsync(httpContext, ex);
+                var traceId = httpContext.TraceIdentifier;
+                var method = httpContext.Request.Method;
+                var path = httpContext.Request.Path;
+
+                _logger.LogError(ex, LogTemplates.ErrorNoControlado, method, path, ex.Message);
+
+                await HandleExceptionAsync(httpContext, ex, traceId);
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static bool IsCatastrophic(Exception ex) =>
+            ex is OutOfMemoryException or ThreadAbortException;
+
+        private static async Task HandleExceptionAsync(HttpContext context, Exception exception, string traceId)
         {
             context.Response.ContentType = "application/json";
-            int statusCode = (int)HttpStatusCode.InternalServerError;
-            object response;
 
-            switch (exception)
+            var (statusCode, response) = exception switch
             {
-                case ValidationException validationException:
-                    statusCode = (int)HttpStatusCode.BadRequest;
-                    response = new
+                ValidationException validationException => (
+                    (int)HttpStatusCode.BadRequest,
+                    (object)new ErrorResponse
                     {
-                        exito = false,
-                        mensaje = "Errores de validación",
-                        errores = validationException.Errors.Select(e => new
+                        Exito = false,
+                        Mensaje = "Errores de validación",
+                        TraceId = traceId,
+                        Errores = validationException.Errors.Select(e => new ErrorDetail
                         {
-                            campo = e.PropertyName,
-                            mensaje = e.ErrorMessage
+                            Campo = e.PropertyName,
+                            Mensaje = e.ErrorMessage
                         })
-                    };
-                    break;
+                    }),
 
-                case ArgumentException:
-                    statusCode = (int)HttpStatusCode.BadRequest;
-                    response = new
-                    {
-                        exito = false,
-                        mensaje = exception.Message
-                    };
-                    break;
+                ArgumentException => (
+                    (int)HttpStatusCode.BadRequest,
+                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
 
-                case KeyNotFoundException:
-                    statusCode = (int)HttpStatusCode.NotFound;
-                    response = new
-                    {
-                        exito = false,
-                        mensaje = exception.Message
-                    };
-                    break;
+                InvalidOperationException => (
+                    (int)HttpStatusCode.BadRequest,
+                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
 
-                case UnauthorizedAccessException:
-                    statusCode = (int)HttpStatusCode.Unauthorized;
-                    response = new
-                    {
-                        exito = false,
-                        mensaje = exception.Message
-                    };
-                    break;
+                KeyNotFoundException => (
+                    (int)HttpStatusCode.NotFound,
+                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
 
-                case InvalidOperationException:
-                    statusCode = (int)HttpStatusCode.Conflict;
-                    response = new
-                    {
-                        exito = false,
-                        mensaje = exception.Message
-                    };
-                    break;
+                UnauthorizedAccessException => (
+                    (int)HttpStatusCode.Unauthorized,
+                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
 
-                default:
-                    response = new
-                    {
-                        exito = false,
-                        mensaje = "Ha ocurrido un error interno del servidor"
-                    };
-                    break;
-            }
+                _ => (
+                    (int)HttpStatusCode.InternalServerError,
+                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId })
+            };
 
             context.Response.StatusCode = statusCode;
 
