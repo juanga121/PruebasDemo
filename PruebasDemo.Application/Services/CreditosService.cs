@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentValidation;
+using Microsoft.Extensions.Logging;
 using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Application.Resources;
@@ -9,10 +10,11 @@ using PruebasDemo.Domain.Enums;
 
 namespace PruebasDemo.Application.Services
 {
-    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger) : ICreditoService
+    public class CreditosService(IGenericRepository<CreditoEntity, Guid> repository, ILogger<CreditosService> logger, IValidator<PagarCuotaDto> pagarCuotaValidator) : ICreditoService
     {
         private readonly IGenericRepository<CreditoEntity, Guid> _repository = repository;
         private readonly ILogger<CreditosService> _logger = logger;
+        private readonly IValidator<PagarCuotaDto> _pagarCuotaValidator = pagarCuotaValidator;
 
         public async Task CrearCredito(CreditoDto creditoDTO)
         {
@@ -56,27 +58,51 @@ namespace PruebasDemo.Application.Services
             await _repository.DeleteAsync(creditoExistente.Id);
         }
 
-        public async Task PagarCuota(Guid id, decimal montoPago)
+        public async Task PagarCuota(PagarCuotaDto dto)
         {
-            var creditoExistente = await _repository.FindByIdAsync(id)
+            var result = await _pagarCuotaValidator.ValidateAsync(dto);
+
+            if (!result.IsValid)
+                throw new InvalidOperationException(result.Errors.First().ErrorMessage);
+
+            var credito = await ObtenerCredito(dto.Id);
+
+            ValidarCreditoActivo(credito);
+            ValidarMonto(dto.MontoPago, credito.Saldo);
+
+            ApplyPago(credito, dto.MontoPago);
+
+            _logger.LogInformation(LogTemplates.PaymentMade, credito.Id, dto.MontoPago);
+
+            await _repository.UpdateAsync(credito);
+        }
+
+        private async Task<CreditoEntity> ObtenerCredito(Guid id)
+        {
+            return await _repository.FindByIdAsync(id)
                 ?? throw new KeyNotFoundException(Mensajes.CreditoNotFound);
+        }
 
-            if (creditoExistente.Estado != CreditoEstado.Activo)
+        private static void ValidarCreditoActivo(CreditoEntity credito)
+        {
+            if (credito.Estado != CreditoEstado.Activo)
                 throw new InvalidOperationException(Mensajes.CreditoNotActive);
+        }
 
-            if (montoPago <= 0)
-                throw new InvalidOperationException(Mensajes.PaymentMustBePositive);
-
-            if (montoPago > creditoExistente.Saldo)
+        private static void ValidarMonto(decimal monto, decimal saldo)
+        {
+            if (monto > saldo)
                 throw new InvalidOperationException(Mensajes.PaymentExceedsBalance);
+        }
 
-            creditoExistente.Saldo -= montoPago;
+        private static void ApplyPago(CreditoEntity credito, decimal montoPago)
+        {
+            credito.Saldo -= montoPago;
 
-            if (creditoExistente.Saldo == 0)
-                creditoExistente.Estado = CreditoEstado.Pagado;
-
-            _logger.LogInformation(LogTemplates.PaymentMade, creditoExistente.Id, montoPago);
-            await _repository.UpdateAsync(creditoExistente);
+            if (credito.Saldo == 0)
+            {
+                credito.Estado = CreditoEstado.Pagado;
+            }
         }
     }
 }

@@ -1,10 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.Extensions.Logging;
 using Moq;
 using PruebasDemo.Application.Interfaces.Repositories;
+using PruebasDemo.Application.Resources;
 using PruebasDemo.Application.Services;
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
+using PruebaDemoTest.Constants;
 
 namespace PruebaDemoTest.PruebasUnitarias.Credito
 {
@@ -12,11 +16,13 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
     {
         private readonly Mock<IGenericRepository<CreditoEntity, Guid>> _repositoryMock;
         private readonly Mock<ILogger<CreditosService>> _loggerMock;
+        private readonly Mock<IValidator<PagarCuotaDto>> _pagarCuotaValidatorMock;
 
         public CreditosServiceTest()
         {
             _repositoryMock = new Mock<IGenericRepository<CreditoEntity, Guid>>();
             _loggerMock = new Mock<ILogger<CreditosService>>();
+            _pagarCuotaValidatorMock = new Mock<IValidator<PagarCuotaDto>>();
         }
 
         [Fact]
@@ -26,17 +32,20 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var credito = new CreditoEntity
             {
                 Id = id,
-                Monto = 100,
-                Saldo = 100,
+                Monto = TestConstants.MontoDefault,
+                Saldo = TestConstants.SaldoDefault,
                 Estado = CreditoEstado.Activo
             };
 
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
 
-            await service.PagarCuota(id, 30);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
+
+            await service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = TestConstants.MontoPagoParcial });
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.Is<CreditoEntity>(c =>
                 c.Id == id &&
@@ -60,9 +69,12 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
 
-            await service.PagarCuota(id, 50);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
+
+            await service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = TestConstants.MontoPagoExacto });
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.Is<CreditoEntity>(c =>
                 c.Id == id &&
@@ -79,10 +91,13 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync((CreditoEntity?)null);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
 
-            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.PagarCuota(id, 10));
-            Assert.Equal("Crédito no encontrado", ex.Message);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
+
+            var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = 10 }));
+            Assert.Equal(Mensajes.CreditoNotFound, ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
         }
@@ -94,18 +109,21 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var credito = new CreditoEntity
             {
                 Id = id,
-                Monto = 100,
-                Saldo = 100,
+                Monto = TestConstants.MontoDefault,
+                Saldo = TestConstants.SaldoDefault,
                 Estado = CreditoEstado.Inactivo
             };
 
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 10));
-            Assert.Equal("El crédito no está activo", ex.Message);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = 10 }));
+            Assert.Equal(Mensajes.CreditoNotActive, ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
         }
@@ -117,21 +135,28 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var credito = new CreditoEntity
             {
                 Id = id,
-                Monto = 100,
-                Saldo = 100,
+                Monto = TestConstants.MontoDefault,
+                Saldo = TestConstants.SaldoDefault,
                 Estado = CreditoEstado.Activo
             };
 
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock
+                .Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult(new List<ValidationFailure>
+                {
+                    new("MontoPago", Mensajes.PaymentMustBePositive)
+                }));
 
-            var exZero = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 0));
-            Assert.Equal("El monto de pago debe ser mayor a cero", exZero.Message);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
-            var exNeg = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, -5));
-            Assert.Equal("El monto de pago debe ser mayor a cero", exNeg.Message);
+            var exZero = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = 0 }));
+            Assert.Equal(Mensajes.PaymentMustBePositive, exZero.Message);
+
+            var exNeg = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = -5 }));
+            Assert.Equal(Mensajes.PaymentMustBePositive, exNeg.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
         }
@@ -143,7 +168,7 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var credito = new CreditoEntity
             {
                 Id = id,
-                Monto = 100,
+                Monto = TestConstants.MontoDefault,
                 Saldo = 40,
                 Estado = CreditoEstado.Activo
             };
@@ -151,10 +176,13 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             _repositoryMock.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(id, 50));
-            Assert.Equal("El monto de pago excede el saldo del crédito", ex.Message);
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PagarCuota(new PagarCuotaDto { Id = id, MontoPago = TestConstants.MontoPagoExacto }));
+            Assert.Equal(Mensajes.PaymentExceedsBalance, ex.Message);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<CreditoEntity>()), Times.Never);
         }
@@ -164,9 +192,9 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
         {
             var dto = new CreditoDto
             {
-                Monto = 100,
-                TasaInteres = 10,
-                Meses = 12
+                Monto = TestConstants.MontoDefault,
+                TasaInteres = TestConstants.TasaInteresDefault,
+                Meses = TestConstants.MesesDefault
             };
 
             CreditoEntity? savedEntity = null;
@@ -176,7 +204,10 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
                 .Callback<CreditoEntity>(c => savedEntity = c)
                 .Returns(Task.CompletedTask);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
             await service.CrearCredito(dto);
 
@@ -193,7 +224,7 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
         {
             var lista = new List<CreditoEntity>
             {
-                new() { Id = Guid.NewGuid(), Monto = 100 },
+                new() { Id = Guid.NewGuid(), Monto = TestConstants.MontoDefault },
                 new() { Id = Guid.NewGuid(), Monto = 200 }
             };
 
@@ -201,7 +232,10 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
                 .Setup(r => r.GetAllAsync())
                 .ReturnsAsync(lista);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
             var result = await service.ObtenerCreditos();
 
@@ -219,7 +253,10 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
                 .Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
             var result = await service.ObtenerCreditoPorId(id);
 
@@ -235,15 +272,15 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
             var credito = new CreditoEntity
             {
                 Id = id,
-                Monto = 100,
+                Monto = TestConstants.MontoDefault,
                 TasaInteres = 5,
-                Meses = 12
+                Meses = TestConstants.MesesDefault
             };
 
             var dto = new CreditoDto
             {
                 Monto = 200,
-                TasaInteres = 10,
+                TasaInteres = TestConstants.TasaInteresDefault,
                 Meses = 24
             };
 
@@ -251,13 +288,16 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
                 .Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
             await service.ActualizarCredito(id, dto);
 
             _repositoryMock.Verify(r => r.UpdateAsync(It.Is<CreditoEntity>(c =>
                 c.Monto == 200 &&
-                c.TasaInteres == 10 &&
+                c.TasaInteres == TestConstants.TasaInteresDefault &&
                 c.Meses == 24
             )), Times.Once);
         }
@@ -273,7 +313,10 @@ namespace PruebaDemoTest.PruebasUnitarias.Credito
                 .Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(credito);
 
-            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object);
+            _pagarCuotaValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<PagarCuotaDto>(), default))
+                .ReturnsAsync(new ValidationResult());
+
+            var service = new CreditosService(_repositoryMock.Object, _loggerMock.Object, _pagarCuotaValidatorMock.Object);
 
             await service.EliminarCredito(id);
 

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using PruebasDemo.Application.Resources.Constants;
 
 namespace PruebasDemo.Middlewares
 {
@@ -21,7 +22,7 @@ namespace PruebasDemo.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error no controlado");
+                _logger.LogError(ex, LogTemplates.ErrorNoControlado);
                 await HandleExceptionAsync(httpContext, ex);
             }
         }

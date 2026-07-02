@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using PruebasDemo.Configuration;
-using PruebasDemo.Infrastructure.Data;
+using PruebasDemo.Constants;
 using PruebasDemo.Middlewares;
 using Serilog;
 using Serilog.Events;
@@ -16,13 +15,12 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("System", LogEventLevel.Error)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
 
-    .WriteTo.Console(outputTemplate:
-        "{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message:lj}{NewLine}")
+    .WriteTo.Console(outputTemplate: ApiConstants.OutputTemplate)
 
     .WriteTo.File(
-        "logs/log-.txt",
+        ApiConstants.LogPath,
         rollingInterval: RollingInterval.Day,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message:lj}{NewLine}"
+        outputTemplate: ApiConstants.OutputTemplate
     )
     .CreateLogger();
 
@@ -32,15 +30,14 @@ builder.Services.AddDatabase(builder.Configuration, builder.Environment);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy(ApiConstants.AllowAll, builder =>
     {
-        builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+        builder.WithOrigins(ApiConstants.CorsOriginLocal).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
     });
 });
 
 builder.Services.AddControllers();
 
-builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreditoDtoValidator>();
@@ -65,7 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseCors("AllowAll");
+app.UseCors(ApiConstants.AllowAll);
 
 app.UseHttpsRedirection();
 

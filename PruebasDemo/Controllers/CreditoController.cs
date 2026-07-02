@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PruebasDemo.Application.Interfaces.Services;
 using PruebasDemo.Domain.DTO;
-using PruebasDemo.Resources;
+using PruebasDemo.Application.Resources;
 
 namespace PruebasDemo.Controllers
 {
@@ -19,7 +19,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessCreated
+                mensaje = Mensajes.SuccessCreated
             });
         }
 
@@ -31,7 +31,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessGet,
+                mensaje = Mensajes.SuccessGet,
                 data = creditos
             });
         }
@@ -44,7 +44,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessFound,
+                mensaje = Mensajes.SuccessFound,
                 data = credito
             });
         }
@@ -57,7 +57,7 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessUpdated
+                mensaje = Mensajes.SuccessUpdated
             });
         }
 
@@ -69,19 +69,19 @@ namespace PruebasDemo.Controllers
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessDeleted
+                mensaje = Mensajes.SuccessDeleted
             });
         }
 
-        [HttpPut("pagar/{id}")]
-        public async Task<IActionResult> PagarCuota(Guid id, [FromBody] decimal montoPago)
+        [HttpPut("pagar")]
+        public async Task<IActionResult> PagarCuota(PagarCuotaDto pagarCuotaDto)
         {
-            await _creditosService.PagarCuota(id, montoPago);
+            await _creditosService.PagarCuota(pagarCuotaDto);
 
             return Ok(new
             {
                 exito = true,
-                mensaje = CreditoMensajes.SuccessPayment
+                mensaje = Mensajes.SuccessPayment
             });
         }
     }

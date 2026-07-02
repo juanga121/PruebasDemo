@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PruebasDemo.Constants;
 using PruebasDemo.Infrastructure.Data;
 
 namespace PruebasDemo.Configuration
@@ -12,10 +13,10 @@ namespace PruebasDemo.Configuration
         {
             var connectionString = configuration.GetConnectionString("ConexionDB");
 
-            if (environment.IsEnvironment("Testing"))
+            if (environment.IsEnvironment(ApiConstants.TestingEnv))
             {
                 services.AddDbContext<DataContext>(options =>
-                    options.UseInMemoryDatabase("PruebasDemo_TestingDb"));
+                    options.UseInMemoryDatabase(ApiConstants.TestingDbName));
             }
             else
             {

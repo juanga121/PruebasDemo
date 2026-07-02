@@ -4,6 +4,7 @@ using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
 using PruebasDemo.Infrastructure.Data;
+using PruebaDemoTest.Constants;
 using System.Net.Http.Json;
 
 namespace PruebaDemoTest.PruebasIntegracion.Credito
@@ -31,9 +32,9 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
 
             var dto = new CreditoDto
             {
-                Monto = 100,
-                TasaInteres = 10,
-                Meses = 12
+                Monto = TestConstants.MontoDefault,
+                TasaInteres = TestConstants.TasaInteresDefault,
+                Meses = TestConstants.MesesDefault
             };
 
             var response = await _client.PostAsJsonAsync("/api/credito", dto);
@@ -67,10 +68,10 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
                 db.Creditos.Add(new CreditoEntity
                 {
                     Id = Guid.NewGuid(),
-                    Monto = 100,
-                    TasaInteres = 10,
-                    Meses = 12,
-                    Saldo = 100,
+                    Monto = TestConstants.MontoDefault,
+                    TasaInteres = TestConstants.TasaInteresDefault,
+                    Meses = TestConstants.MesesDefault,
+                    Saldo = TestConstants.SaldoDefault,
                     Estado = CreditoEstado.Activo
                 });
 
@@ -136,10 +137,10 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
                 var credito = new CreditoEntity
                 {
                     Id = Guid.NewGuid(),
-                    Monto = 100,
-                    TasaInteres = 10,
-                    Meses = 12,
-                    Saldo = 100,
+                    Monto = TestConstants.MontoDefault,
+                    TasaInteres = TestConstants.TasaInteresDefault,
+                    Meses = TestConstants.MesesDefault,
+                    Saldo = TestConstants.SaldoDefault,
                     Estado = CreditoEstado.Activo
                 };
 
@@ -184,10 +185,10 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
                 var credito = new CreditoEntity
                 {
                     Id = Guid.NewGuid(),
-                    Monto = 100,
-                    TasaInteres = 10,
-                    Meses = 12,
-                    Saldo = 100,
+                    Monto = TestConstants.MontoDefault,
+                    TasaInteres = TestConstants.TasaInteresDefault,
+                    Meses = TestConstants.MesesDefault,
+                    Saldo = TestConstants.SaldoDefault,
                     Estado = CreditoEstado.Activo
                 };
 
@@ -223,10 +224,10 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
                 var credito = new CreditoEntity
                 {
                     Id = Guid.NewGuid(),
-                    Monto = 100,
-                    TasaInteres = 10,
-                    Meses = 12,
-                    Saldo = 100,
+                    Monto = TestConstants.MontoDefault,
+                    TasaInteres = TestConstants.TasaInteresDefault,
+                    Meses = TestConstants.MesesDefault,
+                    Saldo = TestConstants.SaldoDefault,
                     Estado = CreditoEstado.Activo
                 };
 
@@ -236,9 +237,9 @@ namespace PruebaDemoTest.PruebasIntegracion.Credito
                 id = credito.Id;
             }
 
-            decimal pago = 50;
+            decimal pago = TestConstants.MontoPagoExacto;
 
-            var response = await _client.PutAsJsonAsync($"/api/credito/pagar/{id}", pago);
+            var response = await _client.PutAsJsonAsync($"/api/credito/pagar", new { Id = id, MontoPago = pago });
 
             response.EnsureSuccessStatusCode();
 
