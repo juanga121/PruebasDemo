@@ -9,6 +9,10 @@ namespace PruebasDemo.Middlewares
     {
         private readonly RequestDelegate _next = next;
         private readonly ILogger<ExceptionMiddleware> _logger = logger;
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         public async Task InvokeAsync(HttpContext httpContext)
         {
@@ -74,10 +78,7 @@ namespace PruebasDemo.Middlewares
 
             context.Response.StatusCode = statusCode;
 
-            var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            var json = JsonSerializer.Serialize(response, _jsonOptions);
 
             await context.Response.WriteAsync(json);
         }

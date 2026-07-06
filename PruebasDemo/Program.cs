@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PruebasDemo.Configuration;
 using PruebasDemo.Constants;
 using PruebasDemo.Middlewares;
@@ -53,10 +54,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment(ApiConstants.TestingEnv))
 {
-    var db = scope.ServiceProvider.GetRequiredService<PruebasDemo.Infrastructure.Data.DataContext>();
-    db.Database.EnsureCreated();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PruebasDemo.Infrastructure.Data.DataContext>();
+        await db.Database.MigrateAsync();
+    }
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -71,4 +75,4 @@ app.MapControllers();
 
 await app.RunAsync();
 
-public partial class Program { }
+public partial class Program { private Program() { } }
