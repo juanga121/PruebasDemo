@@ -11,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-    .MinimumLevel.Override("System", LogEventLevel.Error)
+    .MinimumLevel.Override(ApiConstants.LogSourceMicrosoft, LogEventLevel.Error)
+    .MinimumLevel.Override(ApiConstants.LogSourceSystem, LogEventLevel.Error)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
 
     .WriteTo.Console(outputTemplate: ApiConstants.OutputTemplate)

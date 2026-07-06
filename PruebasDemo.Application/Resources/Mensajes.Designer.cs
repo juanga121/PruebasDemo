@@ -194,5 +194,14 @@ namespace PruebasDemo.Application.Resources {
                 return ResourceManager.GetString("TasaMustBePositive", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Errores de validación.
+        /// </summary>
+        public static string ValidationErrors {
+            get {
+                return ResourceManager.GetString("ValidationErrors", resourceCulture);
+            }
+        }
     }
 }

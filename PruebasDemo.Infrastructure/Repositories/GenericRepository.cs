@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PruebasDemo.Application.Interfaces.Repositories;
+using PruebasDemo.Domain;
 using PruebasDemo.Infrastructure.Data;
 using System.Linq.Expressions;
 
@@ -71,7 +72,7 @@ namespace PruebasDemo.Infrastructure.Repositories
 
         private static void SetCreationDate(T entity)
         {
-            var prop = typeof(T).GetProperty("FechaCreacion");
+            var prop = typeof(T).GetProperty(DomainConstants.PropertyFechaCreacion);
 
             if (prop != null && prop.PropertyType == typeof(DateTime))
             {

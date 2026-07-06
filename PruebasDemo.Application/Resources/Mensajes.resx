@@ -162,4 +162,7 @@
   <data name="TasaMustBePositive" xml:space="preserve">
     <value>La tasa de interés no puede ser negativa.</value>
   </data>
+  <data name="ValidationErrors" xml:space="preserve">
+    <value>Errores de validación</value>
+  </data>
 </root>

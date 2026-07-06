@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
- using FluentValidation;
+using FluentValidation;
+using PruebasDemo.Application.Resources;
 using PruebasDemo.Application.Resources.Constants;
 
 namespace PruebasDemo.Middlewares
@@ -46,7 +47,7 @@ namespace PruebasDemo.Middlewares
                     (object)new ErrorResponse
                     {
                         Exito = false,
-                        Mensaje = "Errores de validación",
+                        Mensaje = Mensajes.ValidationErrors,
                         TraceId = traceId,
                         Errores = validationException.Errors.Select(e => new ErrorDetail
                         {

@@ -143,4 +143,34 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
         Assert.NotNull(actualizado);
         Assert.Equal(50, actualizado!.Saldo);
     }
+
+    #region ErrorPaths
+
+    [Fact]
+    public async Task CrearCredito_DatosInvalidos_Retorna400()
+    {
+        ResetDatabase();
+
+        var dtoInvalido = new CreditoDto { Monto = 0, TasaInteres = -1, Meses = 0 };
+        var response = await _client.PostAsJsonAsync("/api/credito", dtoInvalido);
+
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+
+        var contenido = await response.Content.ReadAsStringAsync();
+        Assert.Contains("exito", contenido);
+        Assert.Contains("traceId", contenido);
+    }
+
+    [Fact]
+    public async Task PagarCuota_ExcedeSaldo_Retorna400()
+    {
+        SeedCredito(Seeded.CreditoActivo);
+
+        var response = await _client.PutAsJsonAsync("/api/credito/pagar",
+            new { Id = Seeded.CreditoId, MontoPago = 999 });
+
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
 }
