@@ -3,6 +3,7 @@ using System.Text.Json;
 using FluentValidation;
 using PruebasDemo.Application.Resources;
 using PruebasDemo.Application.Resources.Constants;
+using PruebasDemo.Constants;
 
 namespace PruebasDemo.Middlewares
 {
@@ -38,7 +39,7 @@ namespace PruebasDemo.Middlewares
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception, string traceId)
         {
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = ApiConstants.ContentTypeJson;
 
             var (statusCode, response) = exception switch
             {

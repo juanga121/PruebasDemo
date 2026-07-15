@@ -13,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override(ApiConstants.LogSourceMicrosoft, LogEventLevel.Error)
     .MinimumLevel.Override(ApiConstants.LogSourceSystem, LogEventLevel.Error)
-    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
+    .MinimumLevel.Override(ApiConstants.LogSourceEFCore, LogEventLevel.Error)
 
     .WriteTo.Console(outputTemplate: ApiConstants.OutputTemplate)
 

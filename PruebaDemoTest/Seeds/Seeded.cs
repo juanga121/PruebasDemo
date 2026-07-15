@@ -32,6 +32,18 @@ public static class Seeded
         Monto = 200, TasaInteres = 10, Meses = 24
     };
 
+    public static CreditoEntity CreditoPersonalizado => new()
+    {
+        Id = Guid.NewGuid(), Monto = 200,
+        TasaInteres = 5, Meses = 6,
+        Saldo = 200, Estado = CreditoEstado.Activo
+    };
+
+    public static CreditoDto CreditoUpdateDto => new()
+    {
+        Monto = 500, TasaInteres = 8, Meses = 10
+    };
+
     public static CreditoDto ConMontoCero => new() { Monto = 0 };
     public static CreditoDto ConTasaNegativa => new() { TasaInteres = -1 };
     public static CreditoDto ConMesesCero => new() { Meses = 0 };

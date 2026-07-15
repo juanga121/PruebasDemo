@@ -4,6 +4,7 @@ using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
 using PruebasDemo.Infrastructure.Data;
+using PruebaDemoTest.Constants;
 using PruebaDemoTest.Seeds;
 using System.Net.Http.Json;
 
@@ -42,7 +43,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
         ResetDatabase();
 
         var dto = Seeded.CrearCredito;
-        var response = await _client.PostAsJsonAsync("/api/credito", dto);
+        var response = await _client.PostAsJsonAsync(ApiRoutes.Credito, dto);
 
         response.EnsureSuccessStatusCode();
 
@@ -65,7 +66,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         SeedCredito(Seeded.CreditoActivo);
 
-        var response = await _client.GetAsync("/api/credito");
+        var response = await _client.GetAsync(ApiRoutes.Credito);
         response.EnsureSuccessStatusCode();
 
         var contenido = await response.Content.ReadAsStringAsync();
@@ -76,16 +77,9 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task ObtenerCreditoPorId_Endpoint_Get_RetornaCredito()
     {
-        var seed = new CreditoEntity
-        {
-            Id = Guid.NewGuid(), Monto = 200,
-            TasaInteres = 5, Meses = 6,
-            Saldo = 200, Estado = CreditoEstado.Activo
-        };
+        var id = SeedCredito(Seeded.CreditoPersonalizado);
 
-        var id = SeedCredito(seed);
-
-        var response = await _client.GetAsync($"/api/credito/{id}");
+        var response = await _client.GetAsync(ApiRoutes.CreditoPorId(id));
         response.EnsureSuccessStatusCode();
 
         var contenido = await response.Content.ReadAsStringAsync();
@@ -98,8 +92,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         var id = SeedCredito(Seeded.CreditoActivo);
 
-        var dto = new CreditoDto { Monto = 500, TasaInteres = 8, Meses = 10 };
-        var response = await _client.PutAsJsonAsync($"/api/credito/{id}", dto);
+        var response = await _client.PutAsJsonAsync(ApiRoutes.CreditoPorId(id), Seeded.CreditoUpdateDto);
 
         response.EnsureSuccessStatusCode();
 
@@ -108,8 +101,8 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
         var actualizado = await db.Creditos.FindAsync(id);
 
         Assert.NotNull(actualizado);
-        Assert.Equal(dto.Monto, actualizado!.Monto);
-        Assert.Equal(dto.TasaInteres, actualizado.TasaInteres);
+        Assert.Equal(Seeded.CreditoUpdateDto.Monto, actualizado!.Monto);
+        Assert.Equal(Seeded.CreditoUpdateDto.TasaInteres, actualizado.TasaInteres);
     }
 
     [Fact]
@@ -117,7 +110,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         var id = SeedCredito(Seeded.CreditoActivo);
 
-        var response = await _client.DeleteAsync($"/api/credito/{id}");
+        var response = await _client.DeleteAsync(ApiRoutes.CreditoPorId(id));
         response.EnsureSuccessStatusCode();
 
         using var scope = _factory.Services.CreateScope();
@@ -132,7 +125,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         var id = SeedCredito(Seeded.CreditoActivo);
 
-        var response = await _client.PutAsJsonAsync($"/api/credito/pagar",
+        var response = await _client.PutAsJsonAsync(ApiRoutes.PagarCuota,
             new { Id = id, MontoPago = 50 });
         response.EnsureSuccessStatusCode();
 
@@ -152,7 +145,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
         ResetDatabase();
 
         var dtoInvalido = new CreditoDto { Monto = 0, TasaInteres = -1, Meses = 0 };
-        var response = await _client.PostAsJsonAsync("/api/credito", dtoInvalido);
+        var response = await _client.PostAsJsonAsync(ApiRoutes.Credito, dtoInvalido);
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -166,7 +159,7 @@ public class CreditosIntegrationTest : IClassFixture<CustomWebApplicationFactory
     {
         SeedCredito(Seeded.CreditoActivo);
 
-        var response = await _client.PutAsJsonAsync("/api/credito/pagar",
+        var response = await _client.PutAsJsonAsync(ApiRoutes.PagarCuota,
             new { Id = Seeded.CreditoId, MontoPago = 999 });
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
