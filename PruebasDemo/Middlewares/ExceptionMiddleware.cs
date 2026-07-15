@@ -24,9 +24,9 @@ namespace PruebasDemo.Middlewares
             }
             catch (Exception ex) when (!IsCatastrophic(ex))
             {
-                var traceId = httpContext.TraceIdentifier;
-                var method = httpContext.Request.Method;
-                var path = httpContext.Request.Path;
+                string traceId = httpContext.TraceIdentifier;
+                string method = httpContext.Request.Method;
+                PathString path = httpContext.Request.Path;
 
                 _logger.LogError(ex, LogTemplates.UnhandledError, method, path, ex.Message);
 
@@ -41,7 +41,7 @@ namespace PruebasDemo.Middlewares
         {
             context.Response.ContentType = ApiConstants.ContentTypeJson;
 
-            var (statusCode, response) = exception switch
+            (int statusCode, object response) = exception switch
             {
                 ValidationException validationException => (
                     (int)HttpStatusCode.BadRequest,
@@ -50,10 +50,10 @@ namespace PruebasDemo.Middlewares
                         Success = false,
                         Message = Messages.ValidationErrors,
                         TraceId = traceId,
-                        Errors = validationException.Errors.Select(e => new ErrorDetail
+                        Errors = validationException.Errors.Select(failure => new ErrorDetail
                         {
-                            Field = e.PropertyName,
-                            Message = e.ErrorMessage
+                            Field = failure.PropertyName,
+                            Message = failure.ErrorMessage
                         })
                     }),
 
@@ -80,7 +80,7 @@ namespace PruebasDemo.Middlewares
 
             context.Response.StatusCode = statusCode;
 
-            var json = JsonSerializer.Serialize(response, _jsonOptions);
+            string json = JsonSerializer.Serialize(response, _jsonOptions);
 
             await context.Response.WriteAsync(json);
         }

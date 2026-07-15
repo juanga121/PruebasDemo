@@ -12,16 +12,16 @@ public class ValidationBehaviorTest
     [Fact]
     public async Task Handle_WithoutValidators_InvokesNext()
     {
-        var validators = Enumerable.Empty<IValidator<TestQuery>>();
+        IEnumerable<IValidator<TestQuery>> validators = Enumerable.Empty<IValidator<TestQuery>>();
         var behavior = new ValidationBehavior<TestQuery, string>(validators);
 
         var nextMock = new Mock<RequestHandlerDelegate<string>>();
-        nextMock.Setup(n => n(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
+        nextMock.Setup(next => next(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
 
-        var result = await behavior.Handle(new TestQuery("x"), nextMock.Object, CancellationToken.None);
+        string result = await behavior.Handle(new TestQuery("x"), nextMock.Object, CancellationToken.None);
 
         Assert.Equal("ok", result);
-        nextMock.Verify(n => n(It.IsAny<CancellationToken>()), Times.Once);
+        nextMock.Verify(next => next(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -29,19 +29,19 @@ public class ValidationBehaviorTest
     {
         var validatorMock = new Mock<IValidator<TestQuery>>();
         validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
+            .Setup(validator => validator.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
-        var validators = new[] { validatorMock.Object };
+        IValidator<TestQuery>[] validators = new[] { validatorMock.Object };
         var behavior = new ValidationBehavior<TestQuery, string>(validators);
 
         var nextMock = new Mock<RequestHandlerDelegate<string>>();
-        nextMock.Setup(n => n(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
+        nextMock.Setup(next => next(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
 
-        var result = await behavior.Handle(new TestQuery("x"), nextMock.Object, CancellationToken.None);
+        string result = await behavior.Handle(new TestQuery("x"), nextMock.Object, CancellationToken.None);
 
         Assert.Equal("ok", result);
-        nextMock.Verify(n => n(It.IsAny<CancellationToken>()), Times.Once);
+        nextMock.Verify(next => next(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class ValidationBehaviorTest
     {
         var validatorMock = new Mock<IValidator<TestQuery>>();
         validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
+            .Setup(validator => validator.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult([
                 new FluentValidation.Results.ValidationFailure("Value", "Error test")
             ]));
@@ -62,24 +62,24 @@ public class ValidationBehaviorTest
         await Assert.ThrowsAsync<ValidationException>(() =>
             behavior.Handle(new TestQuery("x"), nextMock.Object, CancellationToken.None));
 
-        nextMock.Verify(n => n(It.IsAny<CancellationToken>()), Times.Never);
+        nextMock.Verify(next => next(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Handle_PassesCancellationTokenToNext()
     {
-        var validators = Enumerable.Empty<IValidator<TestQuery>>();
+        IEnumerable<IValidator<TestQuery>> validators = Enumerable.Empty<IValidator<TestQuery>>();
         var behavior = new ValidationBehavior<TestQuery, string>(validators);
 
         var cts = new CancellationTokenSource();
-        var token = cts.Token;
+        CancellationToken token = cts.Token;
 
         var nextMock = new Mock<RequestHandlerDelegate<string>>();
-        nextMock.Setup(n => n(token)).ReturnsAsync("ok");
+        nextMock.Setup(next => next(token)).ReturnsAsync("ok");
 
         await behavior.Handle(new TestQuery("x"), nextMock.Object, token);
 
-        nextMock.Verify(n => n(token), Times.Once);
+        nextMock.Verify(next => next(token), Times.Once);
     }
 
     [Fact]
@@ -87,19 +87,19 @@ public class ValidationBehaviorTest
     {
         var validatorMock = new Mock<IValidator<TestQuery>>();
         validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
+            .Setup(validator => validator.ValidateAsync(It.IsAny<ValidationContext<TestQuery>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
         var behavior = new ValidationBehavior<TestQuery, string>([validatorMock.Object]);
 
         var cts = new CancellationTokenSource();
-        var token = cts.Token;
+        CancellationToken token = cts.Token;
         var nextMock = new Mock<RequestHandlerDelegate<string>>();
-        nextMock.Setup(n => n(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
+        nextMock.Setup(next => next(It.IsAny<CancellationToken>())).ReturnsAsync("ok");
 
         await behavior.Handle(new TestQuery("x"), nextMock.Object, token);
 
-        validatorMock.Verify(v => v.ValidateAsync(
+        validatorMock.Verify(validator => validator.ValidateAsync(
             It.IsAny<ValidationContext<TestQuery>>(), token), Times.Once);
     }
 }

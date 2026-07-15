@@ -56,7 +56,7 @@ if (app.Environment.IsDevelopment())
 
 if (!app.Environment.IsEnvironment(ApiConstants.TestingEnv))
 {
-    using (var scope = app.Services.CreateScope())
+    using (IServiceScope scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<PruebasDemo.Infrastructure.Data.DataContext>();
         await db.Database.MigrateAsync();

@@ -6,7 +6,7 @@ namespace PruebasDemo.Infrastructure.Data
 {
     public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
-        public DbSet<Credit> Creditos { get; set; }
+        public DbSet<Credit> Credits { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

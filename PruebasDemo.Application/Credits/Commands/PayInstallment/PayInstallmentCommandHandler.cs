@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Resources;
 using PruebasDemo.Application.Resources.Constants;
+using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 
 namespace PruebasDemo.Application.Credits.Commands.PayInstallment;
@@ -13,14 +14,14 @@ public class PayInstallmentCommandHandler(
 {
     public async Task Handle(PayInstallmentCommand request, CancellationToken cancellationToken)
     {
-        var dto = request.Dto;
+        PayInstallmentDto paymentRequest = request.Dto;
 
-        var credit = await repository.FindByIdAsync(dto.Id)
+        Credit? credit = await repository.FindByIdAsync(paymentRequest.Id)
             ?? throw new KeyNotFoundException(Messages.CreditNotFound);
 
-        ApplyPayment(credit, dto.PaymentAmount);
+        ApplyPayment(credit, paymentRequest.PaymentAmount);
 
-        logger.LogInformation(LogTemplates.PaymentMade, credit.Id, dto.PaymentAmount);
+        logger.LogInformation(LogTemplates.PaymentMade, credit.Id, paymentRequest.PaymentAmount);
         await repository.UpdateAsync(credit);
     }
 

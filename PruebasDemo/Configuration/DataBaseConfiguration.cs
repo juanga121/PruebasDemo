@@ -11,7 +11,7 @@ namespace PruebasDemo.Configuration
             IConfiguration configuration,
             IHostEnvironment environment)
         {
-            var connectionString = configuration.GetConnectionString(ApiConstants.ConnectionStringName);
+            string? connectionString = configuration.GetConnectionString(ApiConstants.ConnectionStringName);
 
             if (environment.IsEnvironment(ApiConstants.TestingEnv))
             {

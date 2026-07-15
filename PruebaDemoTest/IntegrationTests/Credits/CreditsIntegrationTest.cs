@@ -24,15 +24,15 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
 
     private void ResetDatabase()
     {
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
         db.ResetDatabase();
     }
 
     private Guid SeedCredit(PruebasDemo.Domain.Entities.Credit credit)
     {
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
         db.ResetDatabase();
         db.SeedCredit(credit);
         return credit.Id;
@@ -43,22 +43,22 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         ResetDatabase();
 
-        var dto = Seeded.CreateCreditDto;
-        var response = await _client.PostAsJsonAsync(ApiRoutes.Credit, dto);
+        CreditDto createRequest = Seeded.CreateCreditDto;
+        HttpResponseMessage response = await _client.PostAsJsonAsync(ApiRoutes.Credit, createRequest);
 
         response.EnsureSuccessStatusCode();
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var credit = await db.Creditos.FirstOrDefaultAsync(c =>
-            c.Amount == dto.Amount &&
-            c.InterestRate == dto.InterestRate &&
-            c.Months == dto.Months
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        Credit? credit = await db.Credits.FirstOrDefaultAsync(credit =>
+            credit.Amount == createRequest.Amount &&
+            credit.InterestRate == createRequest.InterestRate &&
+            credit.Months == createRequest.Months
         );
 
         Assert.NotNull(credit);
-        Assert.Equal(dto.Amount, credit!.Amount);
-        Assert.Equal(dto.Amount, credit.Balance);
+        Assert.Equal(createRequest.Amount, credit!.Amount);
+        Assert.Equal(createRequest.Amount, credit.Balance);
         Assert.Equal(CreditStatus.Active, credit.Status);
     }
 
@@ -67,10 +67,10 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         SeedCredit(Seeded.ActiveCredit);
 
-        var response = await _client.GetAsync(ApiRoutes.Credit);
+        HttpResponseMessage response = await _client.GetAsync(ApiRoutes.Credit);
         response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
         Assert.Contains("exito", content);
         Assert.Contains("data", content);
     }
@@ -80,10 +80,10 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         var id = SeedCredit(Seeded.CustomCredit);
 
-        var response = await _client.GetAsync(ApiRoutes.CreditById(id));
+        HttpResponseMessage response = await _client.GetAsync(ApiRoutes.CreditById(id));
         response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
         Assert.Contains("exito", content);
         Assert.Contains("data", content);
     }
@@ -93,13 +93,13 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         var id = SeedCredit(Seeded.ActiveCredit);
 
-        var response = await _client.PutAsJsonAsync(ApiRoutes.CreditById(id), Seeded.CreditUpdateDto);
+        HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.CreditById(id), Seeded.CreditUpdateDto);
 
         response.EnsureSuccessStatusCode();
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var updated = await db.Creditos.FindAsync(id);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        Credit? updated = await db.Credits.FindAsync(id);
 
         Assert.NotNull(updated);
         Assert.Equal(Seeded.CreditUpdateDto.Amount, updated!.Amount);
@@ -111,12 +111,12 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         var id = SeedCredit(Seeded.ActiveCredit);
 
-        var response = await _client.DeleteAsync(ApiRoutes.CreditById(id));
+        HttpResponseMessage response = await _client.DeleteAsync(ApiRoutes.CreditById(id));
         response.EnsureSuccessStatusCode();
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var deleted = await db.Creditos.FindAsync(id);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        Credit? deleted = await db.Credits.FindAsync(id);
 
         Assert.Null(deleted);
     }
@@ -126,13 +126,13 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         var id = SeedCredit(Seeded.ActiveCredit);
 
-        var response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
+        HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
             new { Id = id, PaymentAmount = 50 });
         response.EnsureSuccessStatusCode();
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var updated = await db.Creditos.FindAsync(id);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        DataContext db = scope.ServiceProvider.GetRequiredService<DataContext>();
+        Credit? updated = await db.Credits.FindAsync(id);
 
         Assert.NotNull(updated);
         Assert.Equal(50, updated!.Balance);
@@ -145,12 +145,12 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         ResetDatabase();
 
-        var invalidDto = new CreditDto { Amount = 0, InterestRate = -1, Months = 0 };
-        var response = await _client.PostAsJsonAsync(ApiRoutes.Credit, invalidDto);
+        CreditDto invalidDto = new CreditDto { Amount = 0, InterestRate = -1, Months = 0 };
+        HttpResponseMessage response = await _client.PostAsJsonAsync(ApiRoutes.Credit, invalidDto);
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content);
         Assert.Contains("traceId", content);
     }
@@ -160,7 +160,7 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         SeedCredit(Seeded.ActiveCredit);
 
-        var response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
+        HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
             new { Id = Seeded.CreditId, PaymentAmount = 999 });
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);

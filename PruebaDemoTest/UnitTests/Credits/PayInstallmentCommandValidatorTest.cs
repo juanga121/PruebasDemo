@@ -18,13 +18,13 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_HaveError_When_PaymentAmount_Is_Zero()
     {
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
+            .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(Seeded.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
         var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 0 });
 
-        var result = await validator.TestValidateAsync(command);
+        TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Dto.PaymentAmount)
               .WithErrorMessage(Messages.PaymentMustBePositive);
@@ -34,13 +34,13 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_HaveError_When_Credit_NotFound()
     {
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
+            .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync((PruebasDemo.Domain.Entities.Credit?)null);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
         var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Guid.NewGuid(), PaymentAmount = 50 });
 
-        var result = await validator.TestValidateAsync(command);
+        TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor("Dto.Id")
               .WithErrorMessage(Messages.CreditNotFound);
@@ -50,7 +50,7 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_HaveError_When_Credit_NotActive()
     {
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
+            .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(new PruebasDemo.Domain.Entities.Credit {
                 Id = Seeded.CreditId,
                 Amount = 100,
@@ -61,7 +61,7 @@ public class PayInstallmentCommandValidatorTest
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
         var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 50 });
 
-        var result = await validator.TestValidateAsync(command);
+        TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
         result.ShouldHaveAnyValidationError()
               .WithErrorMessage(Messages.CreditNotActive);
@@ -71,13 +71,13 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_HaveError_When_Payment_Exceeds_Balance()
     {
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(It.IsAny<Guid>()))
+            .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(Seeded.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
         var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 999 });
 
-        var result = await validator.TestValidateAsync(command);
+        TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor("Dto.PaymentAmount")
               .WithErrorMessage(Messages.PaymentExceedsBalance);
@@ -87,13 +87,13 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_NotHaveErrors_When_Payment_Is_Valid()
     {
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(Seeded.CreditId))
+            .Setup(repository => repository.FindByIdAsync(Seeded.CreditId))
             .ReturnsAsync(Seeded.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
         var command = new PayInstallmentCommand(Seeded.PartialPayment);
 
-        var result = await validator.TestValidateAsync(command);
+        TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }

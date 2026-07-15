@@ -8,6 +8,7 @@ using PruebasDemo.Application.Credits.Queries.GetCreditById;
 using PruebasDemo.Application.Credits.Queries.GetCredits;
 using PruebasDemo.Application.Resources;
 using PruebasDemo.Domain.DTO;
+using PruebasDemo.Domain.Entities;
 
 namespace PruebasDemo.Controllers
 {
@@ -30,7 +31,7 @@ namespace PruebasDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCredits()
         {
-            var credits = await sender.Send(new GetCreditsQuery());
+            List<Credit> credits = await sender.Send(new GetCreditsQuery());
 
             return Ok(new
             {
@@ -43,7 +44,7 @@ namespace PruebasDemo.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCreditById(Guid id)
         {
-            var credit = await sender.Send(new GetCreditByIdQuery(id));
+            Credit? credit = await sender.Send(new GetCreditByIdQuery(id));
 
             return Ok(new
             {

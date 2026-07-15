@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Application.Resources.Constants;
+using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
 
@@ -13,15 +14,15 @@ public class CreateCreditCommandHandler(
 {
     public async Task Handle(CreateCreditCommand request, CancellationToken cancellationToken)
     {
-        var dto = request.Credit;
+        CreditDto creditRequest = request.Credit;
 
-        var credit = new Credit
+        Credit credit = new Credit
         {
             Id = Guid.NewGuid(),
-            Amount = dto.Amount,
-            Balance = dto.Amount,
-            InterestRate = dto.InterestRate,
-            Months = dto.Months,
+            Amount = creditRequest.Amount,
+            Balance = creditRequest.Amount,
+            InterestRate = creditRequest.InterestRate,
+            Months = creditRequest.Months,
             Status = CreditStatus.Active
         };
 

@@ -29,29 +29,29 @@ public class CreditsHandlerTest
     [Fact]
     public async Task CreateCredit_ShouldSaveWithCorrectValues()
     {
-        var dto = Seeded.CreateCreditDto;
+        CreditDto createRequest = Seeded.CreateCreditDto;
 
         PruebasDemo.Domain.Entities.Credit? savedEntity = null;
 
         _repositoryMock
-            .Setup(r => r.CreateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()))
-            .Callback<PruebasDemo.Domain.Entities.Credit>(c => savedEntity = c)
+            .Setup(repository => repository.CreateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()))
+            .Callback<PruebasDemo.Domain.Entities.Credit>(credit => savedEntity = credit)
             .Returns(Task.CompletedTask);
 
-        var handler = new CreateCreditCommandHandler(
+        CreateCreditCommandHandler handler = new CreateCreditCommandHandler(
             _repositoryMock.Object,
             Mock.Of<ILogger<CreateCreditCommandHandler>>());
 
-        await handler.Handle(new CreateCreditCommand(dto), default);
+        await handler.Handle(new CreateCreditCommand(createRequest), default);
 
-        _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Once);
+        _repositoryMock.Verify(repository => repository.CreateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Once);
 
         Assert.NotNull(savedEntity);
         Assert.NotEqual(Guid.Empty, savedEntity!.Id);
-        Assert.Equal(dto.Amount, savedEntity.Amount);
-        Assert.Equal(dto.Amount, savedEntity.Balance);
-        Assert.Equal(dto.InterestRate, savedEntity.InterestRate);
-        Assert.Equal(dto.Months, savedEntity.Months);
+        Assert.Equal(createRequest.Amount, savedEntity.Amount);
+        Assert.Equal(createRequest.Amount, savedEntity.Balance);
+        Assert.Equal(createRequest.InterestRate, savedEntity.InterestRate);
+        Assert.Equal(createRequest.Months, savedEntity.Months);
         Assert.Equal(CreditStatus.Active, savedEntity.Status);
     }
 
@@ -62,9 +62,9 @@ public class CreditsHandlerTest
     [Fact]
     public async Task PayInstallment_PartialPayment_ReducesBalanceAndRemainsActive()
     {
-        var credit = Seeded.ActiveCredit;
+        Credit credit = Seeded.ActiveCredit;
 
-        _repositoryMock.Setup(r => r.FindByIdAsync(Seeded.CreditId))
+        _repositoryMock.Setup(repository => repository.FindByIdAsync(Seeded.CreditId))
             .ReturnsAsync(credit);
 
         var handler = new PayInstallmentCommandHandler(
@@ -74,19 +74,19 @@ public class CreditsHandlerTest
         await handler.Handle(
             new PayInstallmentCommand(Seeded.PartialPayment), default);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(c =>
-            c.Id == Seeded.CreditId &&
-            c.Balance == 70 &&
-            c.Status == CreditStatus.Active
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(credit =>
+            credit.Id == Seeded.CreditId &&
+            credit.Balance == 70 &&
+            credit.Status == CreditStatus.Active
         )), Times.Once);
     }
 
     [Fact]
     public async Task PayInstallment_ExactPayment_BalanceZero_StatusPaid()
     {
-        var credit = Seeded.CreditWithBalance50;
+        Credit credit = Seeded.CreditWithBalance50;
 
-        _repositoryMock.Setup(r => r.FindByIdAsync(Seeded.PayId))
+        _repositoryMock.Setup(repository => repository.FindByIdAsync(Seeded.PayId))
             .ReturnsAsync(credit);
 
         var handler = new PayInstallmentCommandHandler(
@@ -96,10 +96,10 @@ public class CreditsHandlerTest
         await handler.Handle(
             new PayInstallmentCommand(Seeded.ExactPayment), default);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(c =>
-            c.Id == Seeded.PayId &&
-            c.Balance == 0 &&
-            c.Status == CreditStatus.Paid
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(credit =>
+            credit.Id == Seeded.PayId &&
+            credit.Balance == 0 &&
+            credit.Status == CreditStatus.Paid
         )), Times.Once);
     }
 
@@ -108,19 +108,19 @@ public class CreditsHandlerTest
     {
         var id = Guid.NewGuid();
 
-        _repositoryMock.Setup(r => r.FindByIdAsync(id))
+        _repositoryMock.Setup(repository => repository.FindByIdAsync(id))
             .ReturnsAsync((PruebasDemo.Domain.Entities.Credit?)null);
 
         var handler = new PayInstallmentCommandHandler(
             _repositoryMock.Object,
             Mock.Of<ILogger<PayInstallmentCommandHandler>>());
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+        KeyNotFoundException exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             handler.Handle(
                 new PayInstallmentCommand(Seeded.Payment(10, id)), default));
 
-        Assert.Equal(Messages.CreditNotFound, ex.Message);
-        _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Never);
+        Assert.Equal(Messages.CreditNotFound, exception.Message);
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Never);
     }
 
     #endregion
@@ -130,21 +130,21 @@ public class CreditsHandlerTest
     [Fact]
     public async Task UpdateCredit_ShouldUpdateData()
     {
-        var credit = Seeded.ActiveCredit;
-        var dto = Seeded.UpdateCreditDto;
+        Credit credit = Seeded.ActiveCredit;
+        CreditDto updateRequest = Seeded.UpdateCreditDto;
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(Seeded.CreditId))
+            .Setup(repository => repository.FindByIdAsync(Seeded.CreditId))
             .ReturnsAsync(credit);
 
-        var handler = new UpdateCreditCommandHandler(_repositoryMock.Object);
+        UpdateCreditCommandHandler handler = new UpdateCreditCommandHandler(_repositoryMock.Object);
 
-        await handler.Handle(new UpdateCreditCommand(Seeded.CreditId, dto), default);
+        await handler.Handle(new UpdateCreditCommand(Seeded.CreditId, updateRequest), default);
 
-        _repositoryMock.Verify(r => r.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(c =>
-            c.Amount == dto.Amount &&
-            c.InterestRate == dto.InterestRate &&
-            c.Months == dto.Months
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.Is<PruebasDemo.Domain.Entities.Credit>(credit =>
+            credit.Amount == updateRequest.Amount &&
+            credit.InterestRate == updateRequest.InterestRate &&
+            credit.Months == updateRequest.Months
         )), Times.Once);
     }
 
@@ -154,16 +154,16 @@ public class CreditsHandlerTest
         var id = Guid.NewGuid();
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(id))
+            .Setup(repository => repository.FindByIdAsync(id))
             .ReturnsAsync((PruebasDemo.Domain.Entities.Credit?)null);
 
         var handler = new UpdateCreditCommandHandler(_repositoryMock.Object);
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+        KeyNotFoundException exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             handler.Handle(new UpdateCreditCommand(id, new CreditDto()), default));
 
-        Assert.Equal(Messages.CreditNotFound, ex.Message);
-        _repositoryMock.Verify(r => r.UpdateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Never);
+        Assert.Equal(Messages.CreditNotFound, exception.Message);
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.IsAny<PruebasDemo.Domain.Entities.Credit>()), Times.Never);
     }
 
     #endregion
@@ -173,17 +173,17 @@ public class CreditsHandlerTest
     [Fact]
     public async Task DeleteCredit_ShouldDeleteCredit()
     {
-        var credit = Seeded.ActiveCredit;
+        Credit credit = Seeded.ActiveCredit;
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(Seeded.CreditId))
+            .Setup(repository => repository.FindByIdAsync(Seeded.CreditId))
             .ReturnsAsync(credit);
 
         var handler = new DeleteCreditCommandHandler(_repositoryMock.Object);
 
         await handler.Handle(new DeleteCreditCommand(Seeded.CreditId), default);
 
-        _repositoryMock.Verify(r => r.DeleteAsync(Seeded.CreditId), Times.Once);
+        _repositoryMock.Verify(repository => repository.DeleteAsync(Seeded.CreditId), Times.Once);
     }
 
     [Fact]
@@ -192,16 +192,16 @@ public class CreditsHandlerTest
         var id = Guid.NewGuid();
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(id))
+            .Setup(repository => repository.FindByIdAsync(id))
             .ReturnsAsync((PruebasDemo.Domain.Entities.Credit?)null);
 
         var handler = new DeleteCreditCommandHandler(_repositoryMock.Object);
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+        KeyNotFoundException exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             handler.Handle(new DeleteCreditCommand(id), default));
 
-        Assert.Equal(Messages.CreditNotFound, ex.Message);
-        _repositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(Messages.CreditNotFound, exception.Message);
+        _repositoryMock.Verify(repository => repository.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
 
     #endregion
@@ -211,18 +211,18 @@ public class CreditsHandlerTest
     [Fact]
     public async Task GetCredits_ShouldReturnList()
     {
-        var list = Seeded.CreditsList;
+        List<Credit> list = Seeded.CreditsList;
 
         _repositoryMock
-            .Setup(r => r.GetAllAsync())
+            .Setup(repository => repository.GetAllAsync())
             .ReturnsAsync(list);
 
         var handler = new GetCreditsQueryHandler(_repositoryMock.Object);
 
-        var result = await handler.Handle(new GetCreditsQuery(), default);
+        List<Credit> result = await handler.Handle(new GetCreditsQuery(), default);
 
         Assert.Equal(2, result.Count);
-        _repositoryMock.Verify(r => r.GetAllAsync(), Times.Once);
+        _repositoryMock.Verify(repository => repository.GetAllAsync(), Times.Once);
     }
 
     #endregion
@@ -233,15 +233,15 @@ public class CreditsHandlerTest
     public async Task GetCreditById_ShouldReturnCredit()
     {
         var id = Seeded.CreditId;
-        var credit = Seeded.ActiveCredit;
+        Credit credit = Seeded.ActiveCredit;
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(id))
+            .Setup(repository => repository.FindByIdAsync(id))
             .ReturnsAsync(credit);
 
         var handler = new GetCreditByIdQueryHandler(_repositoryMock.Object);
 
-        var result = await handler.Handle(new GetCreditByIdQuery(id), default);
+        Credit? result = await handler.Handle(new GetCreditByIdQuery(id), default);
 
         Assert.NotNull(result);
         Assert.Equal(id, result!.Id);
@@ -253,12 +253,12 @@ public class CreditsHandlerTest
         var id = Guid.NewGuid();
 
         _repositoryMock
-            .Setup(r => r.FindByIdAsync(id))
+            .Setup(repository => repository.FindByIdAsync(id))
             .ReturnsAsync((PruebasDemo.Domain.Entities.Credit?)null);
 
         var handler = new GetCreditByIdQueryHandler(_repositoryMock.Object);
 
-        var result = await handler.Handle(new GetCreditByIdQuery(id), default);
+        Credit? result = await handler.Handle(new GetCreditByIdQuery(id), default);
 
         Assert.Null(result);
     }

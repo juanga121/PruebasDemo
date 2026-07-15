@@ -3,6 +3,7 @@ using PruebasDemo.Application.Interfaces.Repositories;
 using PruebasDemo.Domain;
 using PruebasDemo.Infrastructure.Data;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace PruebasDemo.Infrastructure.Repositories
 {
@@ -10,13 +11,13 @@ namespace PruebasDemo.Infrastructure.Repositories
         where T : class
         where TKey : notnull
     {
-        private readonly DataContext _efContext;
+        private readonly DataContext _dbContext;
         private readonly DbSet<T> _dbSet;
 
-        public GenericRepository(DataContext efContext)
+        public GenericRepository(DataContext dbContext)
         {
-            _efContext = efContext;
-            _dbSet = _efContext.Set<T>();
+            _dbContext = dbContext;
+            _dbSet = _dbContext.Set<T>();
         }
 
         public async Task CreateAsync(T entity)
@@ -24,18 +25,18 @@ namespace PruebasDemo.Infrastructure.Repositories
             SetCreationDate(entity);
 
             await _dbSet.AddAsync(entity);
-            await _efContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(TKey id)
         {
-            var entity = await FindByIdAsync(id);
+            T? entity = await FindByIdAsync(id);
 
             if (entity == null)
                 return;
 
             _dbSet.Remove(entity);
-            await _efContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<T?> FindByIdAsync(TKey id)
@@ -66,17 +67,17 @@ namespace PruebasDemo.Infrastructure.Repositories
         public async Task UpdateAsync(T entity)
         {
             _dbSet.Attach(entity);
-            _efContext.Entry(entity).State = EntityState.Modified;
-            await _efContext.SaveChangesAsync();
+            _dbContext.Entry(entity).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
         }
 
         private static void SetCreationDate(T entity)
         {
-            var prop = typeof(T).GetProperty(DomainConstants.PropertyCreationDate);
+            PropertyInfo? creationDateProperty = typeof(T).GetProperty(DomainConstants.PropertyCreationDate);
 
-            if (prop != null && prop.PropertyType == typeof(DateTime))
+            if (creationDateProperty != null && creationDateProperty.PropertyType == typeof(DateTime))
             {
-                prop.SetValue(entity, DateTime.UtcNow);
+                creationDateProperty.SetValue(entity, DateTime.UtcNow);
             }
         }
     }

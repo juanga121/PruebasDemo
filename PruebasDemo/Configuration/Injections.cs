@@ -18,15 +18,15 @@ namespace PruebasDemo.Configuration
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
 
-            var assembly = typeof(CreateCreditCommand).Assembly;
-            var voidRequestTypes = assembly.GetTypes()
+            Assembly assembly = typeof(CreateCreditCommand).Assembly;
+            IEnumerable<Type> unitRequestTypes = assembly.GetTypes()
                 .Where(t => t is { IsClass: true, IsAbstract: false })
                 .Where(t => typeof(IRequest).IsAssignableFrom(t));
 
-            foreach (var requestType in voidRequestTypes)
+            foreach (Type requestType in unitRequestTypes)
             {
-                var behaviorType = typeof(ValidationBehavior<>).MakeGenericType(requestType);
-                var serviceType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, typeof(Unit));
+                Type behaviorType = typeof(ValidationBehavior<>).MakeGenericType(requestType);
+                Type serviceType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, typeof(Unit));
                 services.AddTransient(serviceType, behaviorType);
             }
 

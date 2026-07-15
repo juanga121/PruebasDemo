@@ -77,7 +77,7 @@ public static class Seeded
 
     public static Guid SeedCredit(this DataContext db, Credit credit)
     {
-        db.Creditos.Add(credit);
+        db.Credits.Add(credit);
         db.SaveChanges();
         return credit.Id;
     }

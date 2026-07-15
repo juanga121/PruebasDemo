@@ -39,9 +39,9 @@ public class PayInstallmentCommandValidator : AbstractValidator<PayInstallmentCo
             context.AddFailure(Messages.CreditNotActive);
     }
 
-    private static void ValidatePaymentAmount(PayInstallmentDto dto, Credit? credit, ValidationContext<PayInstallmentCommand> context)
+    private static void ValidatePaymentAmount(PayInstallmentDto paymentData, Credit? credit, ValidationContext<PayInstallmentCommand> context)
     {
-        if (credit is not null && dto.PaymentAmount > credit.Balance)
+        if (credit is not null && paymentData.PaymentAmount > credit.Balance)
             context.AddFailure(nameof(PayInstallmentCommand.Dto) + "." + nameof(PayInstallmentDto.PaymentAmount), Messages.PaymentExceedsBalance);
     }
 }
