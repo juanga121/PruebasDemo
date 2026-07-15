@@ -7,66 +7,66 @@ namespace PruebaDemoTest.Seeds;
 
 public static class Seeded
 {
-    public static readonly Guid CreditoId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-    public static readonly Guid PagarId = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
+    public static readonly Guid CreditId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+    public static readonly Guid PayId = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
 
-    public static CreditoEntity CreditoActivo => new()
+    public static Credit ActiveCredit => new()
     {
-        Id = CreditoId, Monto = 100, Saldo = 100,
-        TasaInteres = 10, Meses = 12, Estado = CreditoEstado.Activo
+        Id = CreditId, Amount = 100, Balance = 100,
+        InterestRate = 10, Months = 12, Status = CreditStatus.Active
     };
 
-    public static CreditoEntity CreditoSaldo50 => new()
+    public static Credit CreditWithBalance50 => new()
     {
-        Id = PagarId, Monto = 50, Saldo = 50,
-        TasaInteres = 10, Meses = 12, Estado = CreditoEstado.Activo
+        Id = PayId, Amount = 50, Balance = 50,
+        InterestRate = 10, Months = 12, Status = CreditStatus.Active
     };
 
-    public static CreditoDto CrearCredito => new()
+    public static CreditDto CreateCreditDto => new()
     {
-        Monto = 100, TasaInteres = 10, Meses = 12
+        Amount = 100, InterestRate = 10, Months = 12
     };
 
-    public static CreditoDto ActualizarCredito => new()
+    public static CreditDto UpdateCreditDto => new()
     {
-        Monto = 200, TasaInteres = 10, Meses = 24
+        Amount = 200, InterestRate = 10, Months = 24
     };
 
-    public static CreditoEntity CreditoPersonalizado => new()
+    public static Credit CustomCredit => new()
     {
-        Id = Guid.NewGuid(), Monto = 200,
-        TasaInteres = 5, Meses = 6,
-        Saldo = 200, Estado = CreditoEstado.Activo
+        Id = Guid.NewGuid(), Amount = 200,
+        InterestRate = 5, Months = 6,
+        Balance = 200, Status = CreditStatus.Active
     };
 
-    public static CreditoDto CreditoUpdateDto => new()
+    public static CreditDto CreditUpdateDto => new()
     {
-        Monto = 500, TasaInteres = 8, Meses = 10
+        Amount = 500, InterestRate = 8, Months = 10
     };
 
-    public static CreditoDto ConMontoCero => new() { Monto = 0 };
-    public static CreditoDto ConTasaNegativa => new() { TasaInteres = -1 };
-    public static CreditoDto ConMesesCero => new() { Meses = 0 };
+    public static CreditDto WithZeroAmount => new() { Amount = 0 };
+    public static CreditDto WithNegativeRate => new() { InterestRate = -1 };
+    public static CreditDto WithZeroMonths => new() { Months = 0 };
 
-    public static PagarCuotaDto PagoParcial => new()
+    public static PayInstallmentDto PartialPayment => new()
     {
-        Id = CreditoId, MontoPago = 30
+        Id = CreditId, PaymentAmount = 30
     };
 
-    public static PagarCuotaDto PagoExacto => new()
+    public static PayInstallmentDto ExactPayment => new()
     {
-        Id = PagarId, MontoPago = 50
+        Id = PayId, PaymentAmount = 50
     };
 
-    public static PagarCuotaDto Pago(decimal monto, Guid id) => new()
+    public static PayInstallmentDto Payment(decimal amount, Guid id) => new()
     {
-        Id = id, MontoPago = monto
+        Id = id, PaymentAmount = amount
     };
 
-    public static List<CreditoEntity> ListaCreditos =>
+    public static List<Credit> CreditsList =>
     [
-        new() { Id = Guid.NewGuid(), Monto = 100 },
-        new() { Id = Guid.NewGuid(), Monto = 200 }
+        new() { Id = Guid.NewGuid(), Amount = 100 },
+        new() { Id = Guid.NewGuid(), Amount = 200 }
     ];
 
     public static void ResetDatabase(this DataContext db)
@@ -75,10 +75,10 @@ public static class Seeded
         db.Database.EnsureCreated();
     }
 
-    public static Guid SeedCredito(this DataContext db, CreditoEntity credito)
+    public static Guid SeedCredit(this DataContext db, Credit credit)
     {
-        db.Creditos.Add(credito);
+        db.Creditos.Add(credit);
         db.SaveChanges();
-        return credito.Id;
+        return credit.Id;
     }
 }

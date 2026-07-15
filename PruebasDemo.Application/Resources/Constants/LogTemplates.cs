@@ -4,6 +4,6 @@
     {
         public const string CreditCreate = "Creando nuevo crédito con Id {CreditoId}";
         public const string PaymentMade = "Pago realizado para el crédito con Id {CreditoId} y monto {MontoPago}";
-        public const string ErrorNoControlado = "Error no controlado en {Metodo} {Ruta} — {MensajeError}";
+        public const string UnhandledError = "Error no controlado en {Metodo} {Ruta} — {MensajeError}";
     }
 }

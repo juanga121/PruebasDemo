@@ -6,15 +6,15 @@ namespace PruebasDemo.Infrastructure.Data
 {
     public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
-        public DbSet<CreditoEntity> Creditos { get; set; }
+        public DbSet<Credit> Creditos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CreditoEntity>(entity =>
+            modelBuilder.Entity<Credit>(entity =>
             {
-                entity.Property(e => e.Monto).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
-                entity.Property(e => e.Saldo).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
-                entity.Property(e => e.TasaInteres).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
+                entity.Property(e => e.Amount).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
+                entity.Property(e => e.Balance).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
+                entity.Property(e => e.InterestRate).HasPrecision(DomainConstants.DecimalPrecision, DomainConstants.DecimalScale);
             });
         }
     }

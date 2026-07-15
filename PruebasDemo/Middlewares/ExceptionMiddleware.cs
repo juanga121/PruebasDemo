@@ -28,7 +28,7 @@ namespace PruebasDemo.Middlewares
                 var method = httpContext.Request.Method;
                 var path = httpContext.Request.Path;
 
-                _logger.LogError(ex, LogTemplates.ErrorNoControlado, method, path, ex.Message);
+                _logger.LogError(ex, LogTemplates.UnhandledError, method, path, ex.Message);
 
                 await HandleExceptionAsync(httpContext, ex, traceId);
             }
@@ -47,35 +47,35 @@ namespace PruebasDemo.Middlewares
                     (int)HttpStatusCode.BadRequest,
                     (object)new ErrorResponse
                     {
-                        Exito = false,
-                        Mensaje = Mensajes.ValidationErrors,
+                        Success = false,
+                        Message = Messages.ValidationErrors,
                         TraceId = traceId,
-                        Errores = validationException.Errors.Select(e => new ErrorDetail
+                        Errors = validationException.Errors.Select(e => new ErrorDetail
                         {
-                            Campo = e.PropertyName,
-                            Mensaje = e.ErrorMessage
+                            Field = e.PropertyName,
+                            Message = e.ErrorMessage
                         })
                     }),
 
                 ArgumentException => (
                     (int)HttpStatusCode.BadRequest,
-                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
+                    new ErrorResponse { Success = false, Message = exception.Message, TraceId = traceId }),
 
                 InvalidOperationException => (
                     (int)HttpStatusCode.BadRequest,
-                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
+                    new ErrorResponse { Success = false, Message = exception.Message, TraceId = traceId }),
 
                 KeyNotFoundException => (
                     (int)HttpStatusCode.NotFound,
-                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
+                    new ErrorResponse { Success = false, Message = exception.Message, TraceId = traceId }),
 
                 UnauthorizedAccessException => (
                     (int)HttpStatusCode.Unauthorized,
-                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId }),
+                    new ErrorResponse { Success = false, Message = exception.Message, TraceId = traceId }),
 
                 _ => (
                     (int)HttpStatusCode.InternalServerError,
-                    new ErrorResponse { Exito = false, Mensaje = exception.Message, TraceId = traceId })
+                    new ErrorResponse { Success = false, Message = exception.Message, TraceId = traceId })
             };
 
             context.Response.StatusCode = statusCode;

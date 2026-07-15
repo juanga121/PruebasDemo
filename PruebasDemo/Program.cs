@@ -5,7 +5,7 @@ using PruebasDemo.Middlewares;
 using Serilog;
 using Serilog.Events;
 using FluentValidation;
-using PruebasDemo.Application.Creditos.Commands.CrearCredito;
+using PruebasDemo.Application.Credits.Commands.CreateCredit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +37,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddValidatorsFromAssemblyContaining<CrearCreditoCommandValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCreditCommandValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

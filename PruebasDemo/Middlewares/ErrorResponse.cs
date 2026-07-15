@@ -2,15 +2,15 @@ namespace PruebasDemo.Middlewares
 {
     public class ErrorResponse
     {
-        public bool Exito { get; set; }
-        public string? Mensaje { get; set; }
+        public bool Success { get; set; }
+        public string? Message { get; set; }
         public string? TraceId { get; set; }
-        public IEnumerable<ErrorDetail>? Errores { get; set; }
+        public IEnumerable<ErrorDetail>? Errors { get; set; }
     }
 
     public class ErrorDetail
     {
-        public string? Campo { get; set; }
-        public string? Mensaje { get; set; }
+        public string? Field { get; set; }
+        public string? Message { get; set; }
     }
 }

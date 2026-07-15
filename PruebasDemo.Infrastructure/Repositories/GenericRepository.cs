@@ -72,7 +72,7 @@ namespace PruebasDemo.Infrastructure.Repositories
 
         private static void SetCreationDate(T entity)
         {
-            var prop = typeof(T).GetProperty(DomainConstants.PropertyFechaCreacion);
+            var prop = typeof(T).GetProperty(DomainConstants.PropertyCreationDate);
 
             if (prop != null && prop.PropertyType == typeof(DateTime))
             {
