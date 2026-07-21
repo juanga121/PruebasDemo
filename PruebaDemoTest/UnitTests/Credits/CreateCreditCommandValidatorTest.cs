@@ -12,7 +12,7 @@ public class CreateCreditCommandValidatorTest
     [Fact]
     public void Should_HaveError_When_Amount_Is_Zero()
     {
-        var command = new CreateCreditCommand(Seeded.WithZeroAmount);
+        var command = new CreateCreditCommand(CreditSeeds.WithZeroAmount);
         TestValidationResult<CreateCreditCommand> result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Credit.Amount)
@@ -22,7 +22,7 @@ public class CreateCreditCommandValidatorTest
     [Fact]
     public void Should_HaveError_When_InterestRate_Is_Negative()
     {
-        var command = new CreateCreditCommand(Seeded.WithNegativeRate);
+        var command = new CreateCreditCommand(CreditSeeds.WithNegativeRate);
         TestValidationResult<CreateCreditCommand> result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Credit.InterestRate)
@@ -32,7 +32,7 @@ public class CreateCreditCommandValidatorTest
     [Fact]
     public void Should_HaveError_When_Months_Is_Zero()
     {
-        var command = new CreateCreditCommand(Seeded.WithZeroMonths);
+        var command = new CreateCreditCommand(CreditSeeds.WithZeroMonths);
         TestValidationResult<CreateCreditCommand> result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Credit.Months)
@@ -42,7 +42,7 @@ public class CreateCreditCommandValidatorTest
     [Fact]
     public void Should_NotHaveErrors_When_Model_Is_Valid()
     {
-        var command = new CreateCreditCommand(Seeded.CreateCreditDto);
+        var command = new CreateCreditCommand(CreditSeeds.CreateCreditDto);
         TestValidationResult<CreateCreditCommand> result = _validator.TestValidate(command);
 
         result.ShouldNotHaveAnyValidationErrors();

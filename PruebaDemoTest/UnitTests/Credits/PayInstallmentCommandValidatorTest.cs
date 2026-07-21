@@ -19,10 +19,10 @@ public class PayInstallmentCommandValidatorTest
     {
         _repositoryMock
             .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(Seeded.ActiveCredit);
+            .ReturnsAsync(CreditSeeds.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
-        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 0 });
+        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = CreditSeeds.CreditId, PaymentAmount = 0 });
 
         TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
@@ -52,14 +52,14 @@ public class PayInstallmentCommandValidatorTest
         _repositoryMock
             .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(new PruebasDemo.Domain.Entities.Credit {
-                Id = Seeded.CreditId,
+                Id = CreditSeeds.CreditId,
                 Amount = 100,
                 Balance = 100,
                 Status = CreditStatus.Paid
             });
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
-        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 50 });
+        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = CreditSeeds.CreditId, PaymentAmount = 50 });
 
         TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
@@ -72,10 +72,10 @@ public class PayInstallmentCommandValidatorTest
     {
         _repositoryMock
             .Setup(repository => repository.FindByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(Seeded.ActiveCredit);
+            .ReturnsAsync(CreditSeeds.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
-        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = Seeded.CreditId, PaymentAmount = 999 });
+        var command = new PayInstallmentCommand(new PayInstallmentDto { Id = CreditSeeds.CreditId, PaymentAmount = 999 });
 
         TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 
@@ -87,11 +87,11 @@ public class PayInstallmentCommandValidatorTest
     public async Task Should_NotHaveErrors_When_Payment_Is_Valid()
     {
         _repositoryMock
-            .Setup(repository => repository.FindByIdAsync(Seeded.CreditId))
-            .ReturnsAsync(Seeded.ActiveCredit);
+            .Setup(repository => repository.FindByIdAsync(CreditSeeds.CreditId))
+            .ReturnsAsync(CreditSeeds.ActiveCredit);
 
         var validator = new PayInstallmentCommandValidator(_repositoryMock.Object);
-        var command = new PayInstallmentCommand(Seeded.PartialPayment);
+        var command = new PayInstallmentCommand(PaymentSeeds.PartialPayment);
 
         TestValidationResult<PayInstallmentCommand> result = await validator.TestValidateAsync(command);
 

@@ -43,7 +43,7 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     {
         ResetDatabase();
 
-        CreditDto createRequest = Seeded.CreateCreditDto;
+        CreditDto createRequest = CreditSeeds.CreateCreditDto;
         HttpResponseMessage response = await _client.PostAsJsonAsync(ApiRoutes.Credit, createRequest);
 
         response.EnsureSuccessStatusCode();
@@ -65,7 +65,7 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetCredits_Endpoint_Get_ReturnsList()
     {
-        SeedCredit(Seeded.ActiveCredit);
+        SeedCredit(CreditSeeds.ActiveCredit);
 
         HttpResponseMessage response = await _client.GetAsync(ApiRoutes.Credit);
         response.EnsureSuccessStatusCode();
@@ -78,7 +78,7 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetCreditById_Endpoint_Get_ReturnsCredit()
     {
-        var id = SeedCredit(Seeded.CustomCredit);
+        var id = SeedCredit(CreditSeeds.CustomCredit);
 
         HttpResponseMessage response = await _client.GetAsync(ApiRoutes.CreditById(id));
         response.EnsureSuccessStatusCode();
@@ -91,9 +91,9 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task UpdateCredit_Endpoint_Put_UpdatesCredit()
     {
-        var id = SeedCredit(Seeded.ActiveCredit);
+        var id = SeedCredit(CreditSeeds.ActiveCredit);
 
-        HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.CreditById(id), Seeded.CreditUpdateDto);
+        HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.CreditById(id), CreditSeeds.CreditUpdateDto);
 
         response.EnsureSuccessStatusCode();
 
@@ -102,14 +102,14 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
         Credit? updated = await db.Credits.FindAsync(id);
 
         Assert.NotNull(updated);
-        Assert.Equal(Seeded.CreditUpdateDto.Amount, updated!.Amount);
-        Assert.Equal(Seeded.CreditUpdateDto.InterestRate, updated.InterestRate);
+        Assert.Equal(CreditSeeds.CreditUpdateDto.Amount, updated!.Amount);
+        Assert.Equal(CreditSeeds.CreditUpdateDto.InterestRate, updated.InterestRate);
     }
 
     [Fact]
     public async Task DeleteCredit_Endpoint_Delete_DeletesCredit()
     {
-        var id = SeedCredit(Seeded.ActiveCredit);
+        var id = SeedCredit(CreditSeeds.ActiveCredit);
 
         HttpResponseMessage response = await _client.DeleteAsync(ApiRoutes.CreditById(id));
         response.EnsureSuccessStatusCode();
@@ -124,7 +124,7 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task PayInstallment_Endpoint_Put_UpdatesBalance()
     {
-        var id = SeedCredit(Seeded.ActiveCredit);
+        var id =         SeedCredit(CreditSeeds.ActiveCredit);
 
         HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
             new { Id = id, PaymentAmount = 50 });
@@ -158,10 +158,10 @@ public class CreditsIntegrationTest : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task PayInstallment_ExceedsBalance_Returns400()
     {
-        SeedCredit(Seeded.ActiveCredit);
+        SeedCredit(CreditSeeds.ActiveCredit);
 
         HttpResponseMessage response = await _client.PutAsJsonAsync(ApiRoutes.PayInstallment,
-            new { Id = Seeded.CreditId, PaymentAmount = 999 });
+            new { Id = CreditSeeds.CreditId, PaymentAmount = 999 });
 
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }

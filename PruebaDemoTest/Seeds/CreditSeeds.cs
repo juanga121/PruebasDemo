@@ -1,14 +1,12 @@
 using PruebasDemo.Domain.DTO;
 using PruebasDemo.Domain.Entities;
 using PruebasDemo.Domain.Enums;
-using PruebasDemo.Infrastructure.Data;
 
 namespace PruebaDemoTest.Seeds;
 
-public static class Seeded
+public static class CreditSeeds
 {
     public static readonly Guid CreditId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-    public static readonly Guid PayId = Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901");
 
     public static Credit ActiveCredit => new()
     {
@@ -18,7 +16,7 @@ public static class Seeded
 
     public static Credit CreditWithBalance50 => new()
     {
-        Id = PayId, Amount = 50, Balance = 50,
+        Id = PaymentSeeds.PayId, Amount = 50, Balance = 50,
         InterestRate = 10, Months = 12, Status = CreditStatus.Active
     };
 
@@ -48,37 +46,9 @@ public static class Seeded
     public static CreditDto WithNegativeRate => new() { InterestRate = -1 };
     public static CreditDto WithZeroMonths => new() { Months = 0 };
 
-    public static PayInstallmentDto PartialPayment => new()
-    {
-        Id = CreditId, PaymentAmount = 30
-    };
-
-    public static PayInstallmentDto ExactPayment => new()
-    {
-        Id = PayId, PaymentAmount = 50
-    };
-
-    public static PayInstallmentDto Payment(decimal amount, Guid id) => new()
-    {
-        Id = id, PaymentAmount = amount
-    };
-
     public static List<Credit> CreditsList =>
     [
         new() { Id = Guid.NewGuid(), Amount = 100 },
         new() { Id = Guid.NewGuid(), Amount = 200 }
     ];
-
-    public static void ResetDatabase(this DataContext db)
-    {
-        db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
-    }
-
-    public static Guid SeedCredit(this DataContext db, Credit credit)
-    {
-        db.Credits.Add(credit);
-        db.SaveChanges();
-        return credit.Id;
-    }
 }
